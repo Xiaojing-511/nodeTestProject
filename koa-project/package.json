@@ -1,0 +1,20 @@
+{
+  "name": "koa-project",
+  "version": "1.0.0",
+  "description": "a koa test project",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@koa/router": "^10.0.0",
+    "ejs": "^3.1.5",
+    "koa": "^2.13.1",
+    "koa-views": "^7.0.0",
+    "mysql": "^2.18.1",
+    "nodemon": "^2.0.7",
+    "path": "^0.12.7"
+  }
+}

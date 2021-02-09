@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首页</title>
+</head>
+<body>
+    <h2>
+        <%=welcome%>
+    </h2>
+    <p>
+        <%=commonTitle%>
+    </p>
+    <a href="/blog">blog-----></a>
+    <button class="submit">blog++</button>
+    <script>
+        let oBtn = document.getElementsByClassName('submit')[0];
+        oBtn.onclick = function () {
+            console.log('click.............');
+        }
+    </script>
+
+</body>
+
+</html>
