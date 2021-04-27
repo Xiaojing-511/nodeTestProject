@@ -2,6 +2,7 @@ const Koa = require('koa');
 const app = new Koa();
 const views = require('koa-views');
 const path = require('path');
+const bodyParser = require('koa-bodyparser');
 // 引入路由
 const router = require('./router/index');
 
@@ -11,10 +12,13 @@ app.use(async (ctx, next) => {
     await next();
 })
 
+
 // 配置ejs文件的加载路径
 app.use(views(path.join(__dirname, './views'), {
     extension: 'ejs'  // ejs文件的扩展名，可以是任何有效的扩展名
 }))
+
+app.use(bodyParser());
 
 // 启动路由
 app.use(router.routes()).use(router.allowedMethods())

@@ -4,8 +4,8 @@ var pool = mysql.createPool({
     connectionLimit: 10,
     host: '127.0.0.1',
     user: 'root',
-    password: 'ab123456',
-    database: 'myblogs'
+    password: '000511',
+    database: 'student_system'
 });
 
 function query(sql) {

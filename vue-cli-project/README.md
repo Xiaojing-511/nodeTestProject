@@ -41,3 +41,8 @@ module.exports = {
 }
 注意： mac下 target: 'http://localhost:3000',不可以 需使用 target: 'http://127.0.0.1:3000',
 
+问题：/home从其他页面通过$router.push('/home')跳转路径时页面正常显示 地址栏输入或刷新则报404 (vue-router在history模式下)
+原因：后端没有对应的路径 
+解决：
+1. 使用默认的hash模式
+2. 
