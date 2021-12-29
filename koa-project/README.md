@@ -5,3 +5,6 @@ EJS模板标签
 <%# EJS模板提供的注释方式，不会被作为模板内容编译输出
 
 使用koa-bodyparser 来将请求体中得string数据转换为json
+
+koa-project *main 学生管理系统
+            *website 大学生校园网站
