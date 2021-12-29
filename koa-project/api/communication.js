@@ -3,23 +3,16 @@ let tableArr = [
     "user"
 ]
 async function createUserAccount(bodyData) {
-    let tableArr = [
-        "user"
-    ]
-    let nameIndex = tableArr.indexOf(bodyData.tableName);
-    console.log('--------nameIndex------', nameIndex, bodyData.tableName);
+    console.log('query',bodyData);
     // 汉字需要加引号
-    const queryArr = [
-        `insert into ${bodyData.tableName} (uid,upwd)
-    value('${bodyData.uid}', '${bodyData.upwd}');`
-    ]
-    query(queryArr[nameIndex]).then(res => {
+    await query(`insert into user (uid,upwd)
+    value('${bodyData.uid}', '${bodyData.upwd}');`).then(res => {
         console.log('res',res);
     }).catch(err => {
         console.log(err);
     })
-    query(`select * from ${bodyData.tableName}`).then(res => {
-        console.log('插入后。。。。。。。。。。。', bodyData.tableName);
+    await query(`select * from user`).then(res => {
+        console.log('插入后',res);
     }).catch(err => {
         console.log(err);
     })
