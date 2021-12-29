@@ -5,7 +5,7 @@ var pool = mysql.createPool({
     host: '127.0.0.1',
     user: 'root',
     password: '000511',
-    database: 'student_system'
+    database: 'campus_website'
 });
 
 function query(sql) {

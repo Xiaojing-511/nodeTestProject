@@ -1,12 +1,47 @@
 const { query } = require('../js/server');
 let tableArr = [
-    "student",
-    "academy",
-    "teacher",
-    "course",
-    "found_course",
-    "study"
-];
+    "user"
+]
+async function createUserAccount(bodyData) {
+    let tableArr = [
+        "user"
+    ]
+    let nameIndex = tableArr.indexOf(bodyData.tableName);
+    console.log('--------nameIndex------', nameIndex, bodyData.tableName);
+    // 汉字需要加引号
+    const queryArr = [
+        `insert into ${bodyData.tableName} (uid,upwd)
+    value('${bodyData.uid}', '${bodyData.upwd}');`
+    ]
+    query(queryArr[nameIndex]).then(res => {
+        console.log('res',res);
+    }).catch(err => {
+        console.log(err);
+    })
+    query(`select * from ${bodyData.tableName}`).then(res => {
+        console.log('插入后。。。。。。。。。。。', bodyData.tableName);
+    }).catch(err => {
+        console.log(err);
+    })
+}
+// 登陆-验证密码是否正确
+async function getUserPwd(bodyData){
+    let pwd;
+    await query(`select upwd
+    from user
+    where uid = '${bodyData.uid}';`).then(res=>{
+        pwd = res;
+    })
+    return pwd[0].upwd == bodyData.upwd 
+}
+// let tableArr = [
+//     "student",
+//     "academy",
+//     "teacher",
+//     "course",
+//     "found_course",
+//     "study"
+// ];
 // 获取sql文件绝对路径
 function getSqlFilePath(sqlFileName) {
     let basePath = __dirname
@@ -187,20 +222,11 @@ async function getTeacherScore(bodyData){
     return queryArr;
 }
 
-// 登陆-验证密码是否正确
-async function getUserPwd(bodyData){
-    console.log('--------bodyData',bodyData);
-    let pwd;
-    await query(`select userpwd
-    from user
-    where userid = '${bodyData.userid}';`).then(res=>{
-        pwd = res;
-    })
-    return pwd[0].userpwd == bodyData.userpwd 
-}
+
 
 module.exports = {
     getSqlFilePath, insertValues, queryAllData, deleteTableData, updateTableData, getStudentCourse
     ,getStudentExamInfo,getStudentAvgScore,getTeacherCourse,getTeacherScore,getStudentGraduate,
-    getUserPwd
+    getUserPwd,
+    createUserAccount
 }

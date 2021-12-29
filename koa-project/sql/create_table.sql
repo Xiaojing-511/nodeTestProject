@@ -40,10 +40,8 @@
 -- times char(5) not null,
 -- primary key(assn,cssn));
 
-create table study
-(ssn char(18) not null, 
-cssn char(18) not null,
-tssn char(18) not null,
-score char(5) not null,
-primary key(ssn,cssn,tssn));
+create table user
+(uid char(18) not null, 
+upwd char(18) not null,
+primary key(uid));
 
