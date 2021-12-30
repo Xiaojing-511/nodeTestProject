@@ -1,7 +1,9 @@
 const { query } = require('../js/server');
+const { sortData } = require('./common');
 let tableArr = [
     "user"
 ]
+// 增加新账户
 async function createUserAccount(bodyData) {
     console.log('query',bodyData);
     // 汉字需要加引号
@@ -27,6 +29,40 @@ async function getUserPwd(bodyData){
     })
     return pwd[0].upwd == bodyData.upwd 
 }
+
+// 创建新动态
+async function createUserStatus(bodyData) {
+    // 汉字需要加引号
+    await query(`insert into user_status (uid,sid,contents,createTime)
+    value('${bodyData.uid}', '${bodyData.sid}','${bodyData.contents}','${bodyData.createTime}');`).then(res => {
+        console.log('res',res);
+    }).catch(err => {
+        console.log(err);
+    })
+    await query(`select * from user`).then(res => {
+        console.log('插入后',res);
+    }).catch(err => {
+        console.log(err);
+    })
+}
+
+async function queryAllUserStatus(bodyData){
+    let tableArr = [];
+    await query(`select * from user_status`).then(res => {
+        console.log('查询到的全部动态',res);
+        tableArr = res.sort(sortData);
+    }).catch(err => {
+        console.log(err);
+    })
+    return tableArr
+}
+
+
+
+
+
+
+
 // let tableArr = [
 //     "student",
 //     "academy",
@@ -220,6 +256,6 @@ async function getTeacherScore(bodyData){
 module.exports = {
     getSqlFilePath, insertValues, queryAllData, deleteTableData, updateTableData, getStudentCourse
     ,getStudentExamInfo,getStudentAvgScore,getTeacherCourse,getTeacherScore,getStudentGraduate,
-    getUserPwd,
-    createUserAccount
+    
+    getUserPwd,createUserAccount,createUserStatus,queryAllUserStatus
 }

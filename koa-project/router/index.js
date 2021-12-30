@@ -1,6 +1,5 @@
 const router = require('@koa/router')();
-const { createUserAccount,getUserPwd
-} = require('../api/communication');
+const { createUserAccount,getUserPwd,createUserStatus,queryAllUserStatus } = require('../api/communication');
 router.get('/', async (ctx) => {
     let hello = 'helll world';
     let welcomeText = 'Welcome my blog';
@@ -31,6 +30,24 @@ router.get('/', async (ctx) => {
         data: {
             pwdIsTrue
         }
+    }
+}).post('/createUserStatus',async ctx=>{
+    await createUserStatus(ctx.request.body);
+    ctx.body =
+    {
+        status: 200,
+        data: {
+            
+        }
+    }
+}).post('/getAllUserStatus',async ctx=>{
+    let res = await queryAllUserStatus(ctx.request.body);
+    console.log('res',res);
+    ctx.body =
+    {
+        status: 200,
+        aa: 'aa',
+        data: res
     }
 })
 module.exports = router;

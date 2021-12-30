@@ -1,3 +1,25 @@
+-- 用户表
+-- create table user
+-- (uid char(18) not null, 
+-- upwd char(18) not null,
+-- primary key(uid));
+
+-- 用户动态表
+create table user_status
+(uid char(18) not null, 
+sid char(30) not null, 
+contents varchar(100) not null,
+createTime char(30) not null,
+primary key(uid,sid));
+
+
+
+
+
+
+
+
+
 -- create table student
 -- (ssn char(18) not null, 
 -- name char(10) not null, 
@@ -39,9 +61,3 @@
 -- cssn char(18) not null,
 -- times char(5) not null,
 -- primary key(assn,cssn));
-
-create table user
-(uid char(18) not null, 
-upwd char(18) not null,
-primary key(uid));
-
