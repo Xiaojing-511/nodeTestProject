@@ -1,5 +1,5 @@
 const { query } = require('../js/server');
-const { sortData } = require('./common');
+const { sortData,transformTimestamp } = require('./common');
 let tableArr = [
     "user"
 ]
@@ -33,8 +33,8 @@ async function getUserPwd(bodyData){
 // 创建新动态
 async function createUserStatus(bodyData) {
     // 汉字需要加引号
-    await query(`insert into user_status (uid,sid,contents,createTime)
-    value('${bodyData.uid}', '${bodyData.sid}','${bodyData.contents}','${bodyData.createTime}');`).then(res => {
+    await query(`insert into user_status (uid,sid,contents)
+    value('${bodyData.uid}', '${bodyData.sid}','${bodyData.contents}');`).then(res => {
         console.log('res',res);
     }).catch(err => {
         console.log(err);
@@ -49,12 +49,33 @@ async function createUserStatus(bodyData) {
 async function queryAllUserStatus(bodyData){
     let tableArr = [];
     await query(`select * from user_status`).then(res => {
-        console.log('查询到的全部动态',res);
+        console.log('查询到的全部动态',res,res[0].createTime,typeof res[0].createTime);
         tableArr = res.sort(sortData);
+        console.log('tableArr1',tableArr);
+        tableArr = tableArr.map((item)=>{
+            // console.log(item.createTime,transformTimestamp(item.createTime));
+            item.createTime = transformTimestamp(item.createTime)
+            return item
+        })
+        console.log('tableArr2',tableArr);
     }).catch(err => {
         console.log(err);
     })
     return tableArr
+}
+async function createNewChatContents(bodyData) {
+    console.log('参数', bodyData);
+    await query(`insert into chat (cid,sendId,receptionId,chatContents)
+    value(null,'${bodyData.sendId}', '${bodyData.receptionId}', '${bodyData.chatContents}');`).then(res => {
+        console.log('res',res);
+    }).catch(err => {
+        console.log(err);
+    })
+    await query(`select * from chat`).then(res => {
+        console.log('插入后',res);
+    }).catch(err => {
+        console.log(err);
+    })
 }
 
 
@@ -257,5 +278,5 @@ module.exports = {
     getSqlFilePath, insertValues, queryAllData, deleteTableData, updateTableData, getStudentCourse
     ,getStudentExamInfo,getStudentAvgScore,getTeacherCourse,getTeacherScore,getStudentGraduate,
     
-    getUserPwd,createUserAccount,createUserStatus,queryAllUserStatus
+    getUserPwd,createUserAccount,createUserStatus,queryAllUserStatus,createNewChatContents
 }
