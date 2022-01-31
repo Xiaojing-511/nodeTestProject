@@ -1,6 +1,10 @@
-function sortData(a, b) {
+function sortDataDecrease(a, b) {
     return b.createTime - a.createTime
 }
+function sortDataIncrease(a, b) {
+    return a.sendTime - b.sendTime
+}
+
 //时间转换
 function transformTimestamp(timestamp){
     let a = new Date(timestamp).getTime();
@@ -16,5 +20,5 @@ function transformTimestamp(timestamp){
     return dateString;
 }
 module.exports = {
-    sortData,transformTimestamp
+    sortDataDecrease,sortDataIncrease,transformTimestamp
 }

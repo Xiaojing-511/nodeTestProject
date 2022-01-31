@@ -1,5 +1,5 @@
 const { query } = require('../js/server');
-const { sortData,transformTimestamp } = require('./common');
+const { sortDataDecrease,sortDataIncrease,transformTimestamp } = require('./common');
 let tableArr = [
     "user"
 ]
@@ -50,7 +50,7 @@ async function queryAllUserStatus(bodyData){
     let tableArr = [];
     await query(`select * from user_status`).then(res => {
         console.log('查询到的全部动态',res,res[0].createTime,typeof res[0].createTime);
-        tableArr = res.sort(sortData);
+        tableArr = res.sort(sortDataDecrease);
         console.log('tableArr1',tableArr);
         tableArr = tableArr.map((item)=>{
             // console.log(item.createTime,transformTimestamp(item.createTime));
@@ -67,17 +67,47 @@ async function createNewChatContents(bodyData) {
     console.log('参数', bodyData);
     await query(`insert into chat (cid,sendId,receptionId,chatContents)
     value(null,'${bodyData.sendId}', '${bodyData.receptionId}', '${bodyData.chatContents}');`).then(res => {
+        // return res.sortDataIncrease()
         console.log('res',res);
     }).catch(err => {
         console.log(err);
     })
-    await query(`select * from chat`).then(res => {
-        console.log('插入后',res);
+    // await query(`select * from chat`).then(res => {
+    //     console.log('插入后',res);
+    // }).catch(err => {
+    //     console.log(err);
+    // })
+}
+async function queryChatList(bodyData){
+    let arr = [];
+    await query(`select * from chat where sendId = '${bodyData.sendId}' and receptionId = '${bodyData.receptionId}' or sendId = '${bodyData.receptionId}' and receptionId = '${bodyData.sendId}'`).then(res => {
+        arr = res.sort(sortDataIncrease)
+    }).catch(err => {
+        console.log(err);
+    })
+    return arr
+}
+async function addFriend(bodyData){
+    await query(`insert into user_friend (uid,ufriendId) value('${bodyData.uid}', '${bodyData.ufriendId}');`).then(res => {
+        console.log('res',res);
+    }).catch(err => {
+        console.log(err);
+    })
+    await query(`insert into user_friend (uid,ufriendId) value('${bodyData.ufriendId}', '${bodyData.uid}');`).then(res => {
+        console.log('res',res);
     }).catch(err => {
         console.log(err);
     })
 }
-
+async function queryFriends(bodyData){
+    let arr = [];
+    await query(`select * from user_friend where uid = ${bodyData.uid}`).then(res => {
+        arr = res
+    }).catch(err => {
+        console.log(err);
+    })
+    return arr
+}
 
 
 
@@ -278,5 +308,5 @@ module.exports = {
     getSqlFilePath, insertValues, queryAllData, deleteTableData, updateTableData, getStudentCourse
     ,getStudentExamInfo,getStudentAvgScore,getTeacherCourse,getTeacherScore,getStudentGraduate,
     
-    getUserPwd,createUserAccount,createUserStatus,queryAllUserStatus,createNewChatContents
+    getUserPwd,createUserAccount,createUserStatus,queryAllUserStatus,createNewChatContents,queryChatList,addFriend,queryFriends
 }
