@@ -101,14 +101,28 @@ async function addFriend(bodyData){
 }
 async function queryFriends(bodyData){
     let arr = [];
-    await query(`select * from user_friend where uid = ${bodyData.uid}`).then(res => {
+    await query(`select * from user_friend where uid = '${bodyData.uid}'`).then(res => {
         arr = res
     }).catch(err => {
         console.log(err);
     })
     return arr
 }
-
+// 判断两用户是否为好友
+async function judgeIsFriend(bodyData){
+    let isFriend = '';
+    await query(`select ufriendId from user_friend where uid = '${bodyData.uid}'`).then(res => {
+        console.log('res',res);
+        let friendsIdArr = res.map((item)=>{
+            return item.ufriendId
+        });
+        console.log('friendsIdArr',friendsIdArr);
+        isFriend = friendsIdArr.includes(bodyData.ufriendId);
+    }).catch(err => {
+        console.log(err);
+    })
+    return isFriend;
+}
 
 
 
@@ -308,5 +322,6 @@ module.exports = {
     getSqlFilePath, insertValues, queryAllData, deleteTableData, updateTableData, getStudentCourse
     ,getStudentExamInfo,getStudentAvgScore,getTeacherCourse,getTeacherScore,getStudentGraduate,
     
-    getUserPwd,createUserAccount,createUserStatus,queryAllUserStatus,createNewChatContents,queryChatList,addFriend,queryFriends
+    getUserPwd,createUserAccount,createUserStatus,queryAllUserStatus,createNewChatContents,queryChatList,addFriend,queryFriends,
+    judgeIsFriend
 }

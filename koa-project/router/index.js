@@ -1,6 +1,6 @@
 const router = require('@koa/router')();
 const { createUserAccount,getUserPwd,createUserStatus,queryAllUserStatus
-    ,createNewChatContents,queryChatList,addFriend,queryFriends } = require('../api/communication');
+    ,createNewChatContents,queryChatList,addFriend,queryFriends,judgeIsFriend } = require('../api/communication');
 router.get('/', async (ctx) => {
     let hello = 'helll world';
     let welcomeText = 'Welcome my blog';
@@ -14,6 +14,11 @@ router.get('/', async (ctx) => {
     })
 }).post('/createAccount',async ctx=>{
     await createUserAccount(ctx.request.body);
+    console.log('friend',ctx.request.body.uid);
+    await addFriend({
+        uid: ctx.request.body.uid,
+        ufriendId: '小助手'
+    });
     ctx.body =
     {
         status: 200,
@@ -81,6 +86,16 @@ router.get('/', async (ctx) => {
     {
         status: 200,
         data: res
+    }
+}).post('/judgeIsFriend',async ctx=>{
+    let res = await judgeIsFriend(ctx.request.body);
+    console.log('res',res);
+    ctx.body =
+    {
+        status: 200,
+        data: {
+            isFriend: res
+        }
     }
 })
 module.exports = router;

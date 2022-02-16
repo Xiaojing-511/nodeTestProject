@@ -5,21 +5,21 @@
 -- primary key(uid));
 
 -- 用户动态表
--- create table user_status
--- (uid char(18) not null, 
--- sid char(30) not null, 
--- contents varchar(100) not null,
--- createTime timestamp DEFAULT CURRENT_TIMESTAMP not null,
--- primary key(uid,sid));
+create table user_status
+(uid char(18) not null, 
+sid char(30) not null, 
+contents varchar(100) not null,
+createTime timestamp DEFAULT CURRENT_TIMESTAMP not null,
+primary key(uid,sid));
 
 -- 聊天记录表
--- create table chat
--- (cid bigint(8) unsigned zerofill not null AUTO_INCREMENT,
--- sendId char(18) not null, 
--- receptionId char(18) not null, 
--- sendTime timestamp DEFAULT CURRENT_TIMESTAMP not null,
--- chatContents varchar(150) not null,
--- primary key(cid));
+create table chat
+(cid bigint(8) unsigned zerofill not null AUTO_INCREMENT,
+sendId char(18) not null, 
+receptionId char(18) not null, 
+sendTime timestamp DEFAULT CURRENT_TIMESTAMP not null,
+chatContents varchar(150) not null,
+primary key(cid));
 
 -- 用户好友表
 create table user_friend
