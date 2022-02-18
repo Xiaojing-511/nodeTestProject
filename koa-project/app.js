@@ -25,3 +25,27 @@ app.use(router.routes()).use(router.allowedMethods())
 // 以上为官方推荐方式，allowedMethods用在routes之后，作用是根据ctx.status设置response header.
 app.listen(3000);
 console.log(' ok 3000.....');
+const WebSocket = require('ws') 
+
+const wss = new WebSocket.Server({ port: 8080 })
+// 调用broadcast广播，实现数据互通和实时更新
+wss.broadcast = function (msg) {
+    wss.clients.forEach(function (item) {
+      item.send(msg)
+    })
+  }
+wss.on('connection', ws => {
+//   console.log('server connection')
+    ws.on('message', e => {
+        var resData = JSON.parse(e);
+        console.log('服务端接收的消息：', e)
+        // 每次发送都相当于广播一次消息
+        wss.broadcast(JSON.stringify({ sendId: resData.sendId, receptionId: resData.receptionId}))
+    })
+    ws.on('close', function (e) {
+        console.log('长连接已关闭',e)
+    })
+
+//   ws.send('连接已建立')
+})
+

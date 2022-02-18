@@ -1,8 +1,9 @@
 const { query } = require('../js/server');
 const { sortDataDecrease,sortDataIncrease,transformTimestamp } = require('./common');
-let tableArr = [
-    "user"
-]
+
+// let tableArr = [
+//     "user"
+// ]
 // 增加新账户
 async function createUserAccount(bodyData) {
     console.log('query',bodyData);
