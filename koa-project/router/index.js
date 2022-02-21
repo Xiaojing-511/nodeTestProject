@@ -1,6 +1,9 @@
 const router = require('@koa/router')();
+const upload = require('../js/upload');
 const { createUserAccount,getUserPwd,createUserStatus,queryAllUserStatus
-    ,createNewChatContents,queryChatList,addFriend,queryFriends,judgeIsFriend } = require('../api/communication');
+    ,createNewChatContents,queryChatList,addFriend,queryFriends,judgeIsFriend,
+    createUserCommodityStatus,updateUserInfo,getUserInfo
+} = require('../api/communication');
 router.get('/', async (ctx) => {
     let hello = 'helll world';
     let welcomeText = 'Welcome my blog';
@@ -24,6 +27,28 @@ router.get('/', async (ctx) => {
         status: 200,
         data: {
             
+        }
+    }
+}).post('/getUserInfo',async ctx=>{
+    let info = await getUserInfo(ctx.request.body);
+    ctx.body =
+    {
+        status: 200,
+        data: {
+            info
+        }
+    }
+}).post('/updateAccountInfo',async ctx=>{
+    let info = await updateUserInfo(ctx.request.body);
+    await addFriend({
+        uid: ctx.request.body.uid,
+        ufriendId: '小助手'
+    });
+    ctx.body =
+    {
+        status: 200,
+        data: {
+            info
         }
     }
 })
@@ -97,5 +122,23 @@ router.get('/', async (ctx) => {
             isFriend: res
         }
     }
-})
+}).post('/createUserCommodityStatus',async ctx=>{
+    let res = await createUserCommodityStatus(ctx.request.body);
+    console.log('res',res);
+    ctx.body =
+    {
+        status: 200,
+        data: {
+            
+        }
+    }
+}).post("/add", upload.upload.single("file"), async (ctx) => {
+    console.log('upload...',upload,upload.getImgName());
+    // 返回结果给前端
+    ctx.body = {
+      mesg: "ok",
+      imgName: upload.getImgName(),
+    };
+});
+
 module.exports = router;

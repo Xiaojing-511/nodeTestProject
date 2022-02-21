@@ -1,5 +1,8 @@
 const { query } = require('../js/server');
 const { sortDataDecrease,sortDataIncrease,transformTimestamp } = require('./common');
+const config = {
+    http: 'http://localhost:3000/',
+}
 
 // let tableArr = [
 //     "user"
@@ -8,17 +11,44 @@ const { sortDataDecrease,sortDataIncrease,transformTimestamp } = require('./comm
 async function createUserAccount(bodyData) {
     console.log('query',bodyData);
     // 汉字需要加引号
-    await query(`insert into user (uid,upwd)
-    value('${bodyData.uid}', '${bodyData.upwd}');`).then(res => {
+    await query(`insert into user (uid,upwd,styleText,uImageSrc)
+    value('${bodyData.uid}', '${bodyData.upwd}','${bodyData.styleText}', '${bodyData.uImageSrc}');`).then(res => {
         console.log('res',res);
     }).catch(err => {
         console.log(err);
     })
-    await query(`select * from user`).then(res => {
+    // await query(`select * from user`).then(res => {
+    //     console.log('插入后',res);
+    // }).catch(err => {
+    //     console.log(err);
+    // })
+}
+// 获取用户信息
+async function getUserInfo(bodyData){
+    let info;
+    await query(`select * from user where uid = '${bodyData.uid}'`).then(res => {
+        info = res[0]
+    }).catch(err => {
+        console.log(err);
+    })
+    return info;
+}
+// 修改用户信息
+async function updateUserInfo(bodyData){
+    console.log(bodyData);
+    let info;
+    await query(`update user set styleText = '${bodyData.styleText}', uImageSrc = '${config.http+bodyData.uImageSrc}' where uid = '${bodyData.uid}'`).then(res => {
         console.log('插入后',res);
     }).catch(err => {
         console.log(err);
     })
+    await query(`select * from user where uid = '${bodyData.uid}'`).then(res => {
+        console.log('uid的info',res[0]);
+        info = res[0]
+    }).catch(err => {
+        console.log(err);
+    })
+    return info;
 }
 // 登陆-验证密码是否正确
 async function getUserPwd(bodyData){
@@ -34,14 +64,9 @@ async function getUserPwd(bodyData){
 // 创建新动态
 async function createUserStatus(bodyData) {
     // 汉字需要加引号
-    await query(`insert into user_status (uid,sid,contents)
-    value('${bodyData.uid}', '${bodyData.sid}','${bodyData.contents}');`).then(res => {
+    await query(`insert into user_status (uid,contents)
+    value('${bodyData.uid}','${bodyData.contents}');`).then(res => {
         console.log('res',res);
-    }).catch(err => {
-        console.log(err);
-    })
-    await query(`select * from user`).then(res => {
-        console.log('插入后',res);
     }).catch(err => {
         console.log(err);
     })
@@ -50,7 +75,7 @@ async function createUserStatus(bodyData) {
 async function queryAllUserStatus(bodyData){
     let tableArr = [];
     await query(`select * from user_status`).then(res => {
-        console.log('查询到的全部动态',res,res[0].createTime,typeof res[0].createTime);
+        // console.log('查询到的全部动态',res,res[0].createTime,typeof res[0].createTime);
         tableArr = res.sort(sortDataDecrease);
         console.log('tableArr1',tableArr);
         tableArr = tableArr.map((item)=>{
@@ -124,7 +149,15 @@ async function judgeIsFriend(bodyData){
     })
     return isFriend;
 }
-
+// 创建新二手商品动态
+async function createUserCommodityStatus(bodyData) {
+    await query(`insert into user_commodity (uid,type,contents,image)
+    value('${bodyData.uid}','${bodyData.type}','${bodyData.contents}','${config.http+bodyData.image}');`).then(res => {
+        console.log('res',res);
+    }).catch(err => {
+        console.log(err);
+    })
+}
 
 
 
@@ -323,6 +356,6 @@ module.exports = {
     getSqlFilePath, insertValues, queryAllData, deleteTableData, updateTableData, getStudentCourse
     ,getStudentExamInfo,getStudentAvgScore,getTeacherCourse,getTeacherScore,getStudentGraduate,
     
-    getUserPwd,createUserAccount,createUserStatus,queryAllUserStatus,createNewChatContents,queryChatList,addFriend,queryFriends,
-    judgeIsFriend
+    getUserPwd,createUserAccount,getUserInfo,createUserStatus,queryAllUserStatus,createNewChatContents,queryChatList,addFriend,queryFriends,
+    judgeIsFriend,createUserCommodityStatus,updateUserInfo
 }

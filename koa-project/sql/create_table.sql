@@ -1,33 +1,45 @@
 -- 用户表
--- create table user
--- (uid char(18) not null, 
--- upwd char(18) not null,
--- primary key(uid));
+create table user
+(uid char(18) not null, 
+upwd char(18) not null,
+styleText varchar(50) not null,
+uImageSrc varchar(100) not null,
+primary key(uid));
 
 -- 用户动态表
-create table user_status
-(uid char(18) not null, 
-sid char(30) not null, 
-contents varchar(100) not null,
-createTime timestamp DEFAULT CURRENT_TIMESTAMP not null,
-primary key(uid,sid));
+-- create table user_status
+-- (uid char(18) not null, 
+-- sid bigint(8) unsigned zerofill not null AUTO_INCREMENT, 
+-- contents varchar(100) not null,
+-- createTime timestamp DEFAULT CURRENT_TIMESTAMP not null,
+-- primary key(sid));
 
 -- 聊天记录表
-create table chat
-(cid bigint(8) unsigned zerofill not null AUTO_INCREMENT,
-sendId char(18) not null, 
-receptionId char(18) not null, 
-sendTime timestamp DEFAULT CURRENT_TIMESTAMP not null,
-chatContents varchar(150) not null,
-primary key(cid));
+-- create table chat
+-- (cid bigint(8) unsigned zerofill not null AUTO_INCREMENT,
+-- sendId char(18) not null, 
+-- receptionId char(18) not null, 
+-- sendTime timestamp DEFAULT CURRENT_TIMESTAMP not null,
+-- chatContents varchar(150) not null,
+-- primary key(cid));
 
 -- 用户好友表
-create table user_friend
-(ufid bigint(8) unsigned zerofill not null AUTO_INCREMENT,
-uid char(18) not null, 
-ufriendId char(18) not null,
-addTime timestamp DEFAULT CURRENT_TIMESTAMP not null,
-primary key(ufid));
+-- create table user_friend
+-- (ufid bigint(8) unsigned zerofill not null AUTO_INCREMENT,
+-- uid char(18) not null, 
+-- ufriendId char(18) not null,
+-- addTime timestamp DEFAULT CURRENT_TIMESTAMP not null,
+-- primary key(ufid));
+
+-- 用户发表二手商品动态表
+-- create table user_commodity
+-- (uid char(18) not null, 
+-- cid bigint(8) unsigned zerofill not null AUTO_INCREMENT,  
+-- type varchar(100) not null,
+-- contents varchar(100) not null,
+-- image varchar(100) not null,
+-- createTime timestamp DEFAULT CURRENT_TIMESTAMP not null,
+-- primary key(cid));
 
 
 
