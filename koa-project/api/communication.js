@@ -33,11 +33,28 @@ async function getUserInfo(bodyData){
     })
     return info;
 }
+// 修改用户头像
+async function updateUserImg(bodyData){
+    console.log(bodyData);
+    let info;
+    await query(`update user set uImageSrc = '${config.http+bodyData.uImageSrc}' where uid = '${bodyData.uid}'`).then(res => {
+        console.log('插入后',res);
+    }).catch(err => {
+        console.log(err);
+    })
+    await query(`select * from user where uid = '${bodyData.uid}'`).then(res => {
+        console.log('uid的info',res[0]);
+        info = res[0]
+    }).catch(err => {
+        console.log(err);
+    })
+    return info;
+}
 // 修改用户信息
 async function updateUserInfo(bodyData){
     console.log(bodyData);
     let info;
-    await query(`update user set styleText = '${bodyData.styleText}', uImageSrc = '${config.http+bodyData.uImageSrc}' where uid = '${bodyData.uid}'`).then(res => {
+    await query(`update user set ${bodyData.updatePropKey} = '${bodyData.updatePropValue}' where uid = '${bodyData.uid}'`).then(res => {
         console.log('插入后',res);
     }).catch(err => {
         console.log(err);
@@ -71,10 +88,12 @@ async function createUserStatus(bodyData) {
         console.log(err);
     })
 }
-
+// 查询所有动态
 async function queryAllUserStatus(bodyData){
     let tableArr = [];
-    await query(`select * from user_status`).then(res => {
+    await query(`select u.uImageSrc,us.uid,us.sid,us.contents,us.createTime
+    from user u,user_status us 
+    where u.uid = us.uid`).then(res => {
         // console.log('查询到的全部动态',res,res[0].createTime,typeof res[0].createTime);
         tableArr = res.sort(sortDataDecrease);
         console.log('tableArr1',tableArr);
@@ -104,9 +123,12 @@ async function createNewChatContents(bodyData) {
     //     console.log(err);
     // })
 }
+// 查询聊天记录
 async function queryChatList(bodyData){
     let arr = [];
-    await query(`select * from chat where sendId = '${bodyData.sendId}' and receptionId = '${bodyData.receptionId}' or sendId = '${bodyData.receptionId}' and receptionId = '${bodyData.sendId}'`).then(res => {
+    await query(`select u.uImageSrc,c.cid,c.sendId,c.receptionId,c.chatContents,c.sendTime
+    from chat c, user u
+    where u.uid = c.sendId and c.sendId = '${bodyData.sendId}' and c.receptionId = '${bodyData.receptionId}' or u.uid = c.sendId and c.sendId = '${bodyData.receptionId}' and c.receptionId = '${bodyData.sendId}';`).then(res => {
         arr = res.sort(sortDataIncrease)
     }).catch(err => {
         console.log(err);
@@ -115,12 +137,12 @@ async function queryChatList(bodyData){
 }
 async function addFriend(bodyData){
     await query(`insert into user_friend (uid,ufriendId) value('${bodyData.uid}', '${bodyData.ufriendId}');`).then(res => {
-        console.log('res',res);
+        console.log('res-add',res);
     }).catch(err => {
         console.log(err);
     })
     await query(`insert into user_friend (uid,ufriendId) value('${bodyData.ufriendId}', '${bodyData.uid}');`).then(res => {
-        console.log('res',res);
+        console.log('res-add',res);
     }).catch(err => {
         console.log(err);
     })
@@ -357,5 +379,5 @@ module.exports = {
     ,getStudentExamInfo,getStudentAvgScore,getTeacherCourse,getTeacherScore,getStudentGraduate,
     
     getUserPwd,createUserAccount,getUserInfo,createUserStatus,queryAllUserStatus,createNewChatContents,queryChatList,addFriend,queryFriends,
-    judgeIsFriend,createUserCommodityStatus,updateUserInfo
+    judgeIsFriend,createUserCommodityStatus,updateUserInfo,updateUserImg
 }

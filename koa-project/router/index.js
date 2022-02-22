@@ -2,7 +2,7 @@ const router = require('@koa/router')();
 const upload = require('../js/upload');
 const { createUserAccount,getUserPwd,createUserStatus,queryAllUserStatus
     ,createNewChatContents,queryChatList,addFriend,queryFriends,judgeIsFriend,
-    createUserCommodityStatus,updateUserInfo,getUserInfo
+    createUserCommodityStatus,updateUserInfo,getUserInfo,updateUserImg
 } = require('../api/communication');
 router.get('/', async (ctx) => {
     let hello = 'helll world';
@@ -38,12 +38,18 @@ router.get('/', async (ctx) => {
             info
         }
     }
-}).post('/updateAccountInfo',async ctx=>{
+}).post('/updateAccountImg',async ctx=>{
+    let info = await updateUserImg(ctx.request.body);
+    ctx.body =
+    {
+        status: 200,
+        data: {
+            info
+        }
+    }
+})
+.post('/updateAccountInfo',async ctx=>{
     let info = await updateUserInfo(ctx.request.body);
-    await addFriend({
-        uid: ctx.request.body.uid,
-        ufriendId: '小助手'
-    });
     ctx.body =
     {
         status: 200,
@@ -97,12 +103,10 @@ router.get('/', async (ctx) => {
         data: res
     }
 }).post('/addFriend',async ctx=>{
-    let res = await addFriend(ctx.request.body);
-    console.log('res',res);
+    await addFriend(ctx.request.body);
     ctx.body =
     {
-        status: 200,
-        data: res
+        status: 200
     }
 }).post('/queryFriends',async ctx=>{
     let res = await queryFriends(ctx.request.body);
