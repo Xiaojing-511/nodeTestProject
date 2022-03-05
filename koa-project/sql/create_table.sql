@@ -1,10 +1,10 @@
 -- 用户表
-create table user
-(uid char(18) not null, 
-upwd char(18) not null,
-styleText varchar(50) not null,
-uImageSrc varchar(100) not null,
-primary key(uid));
+-- create table user
+-- (uid char(18) not null, 
+-- upwd char(18) not null,
+-- styleText varchar(50) not null,
+-- uImageSrc varchar(100) not null,
+-- primary key(uid));
 
 -- 用户动态表
 -- create table user_status
@@ -37,7 +37,7 @@ primary key(uid));
 -- cid bigint(8) unsigned zerofill not null AUTO_INCREMENT,  
 -- type varchar(100) not null,
 -- contents varchar(100) not null,
--- image varchar(100) not null,
+-- image varchar(500) not null,
 -- createTime timestamp DEFAULT CURRENT_TIMESTAMP not null,
 -- primary key(cid));
 

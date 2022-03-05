@@ -1,12 +1,18 @@
 const { query } = require('../js/server');
 const { sortDataDecrease,sortDataIncrease,transformTimestamp } = require('./common');
 const config = {
-    http: 'http://localhost:3000/',
+    httpAvatar: 'http://localhost:3000/image_avatar/',
+    httpCommodity: 'http://localhost:3000/image_commodity/',
 }
-
-// let tableArr = [
-//     "user"
-// ]
+// 获取sql文件绝对路径
+function getSqlFilePath(sqlFileName) {
+    let basePath = __dirname
+    basePath = basePath.replace(/\\/g, '\/')
+    let pathArr = basePath.split('\/')
+    pathArr = pathArr.splice(0, pathArr.length - 1)
+    basePath = pathArr.join('/') + '/sql/';
+    return basePath + sqlFileName;
+}
 // 增加新账户
 async function createUserAccount(bodyData) {
     console.log('query',bodyData);
@@ -37,7 +43,7 @@ async function getUserInfo(bodyData){
 async function updateUserImg(bodyData){
     console.log(bodyData);
     let info;
-    await query(`update user set uImageSrc = '${config.http+bodyData.uImageSrc}' where uid = '${bodyData.uid}'`).then(res => {
+    await query(`update user set uImageSrc = '${config.httpAvatar+bodyData.uImageSrc}' where uid = '${bodyData.uid}'`).then(res => {
         console.log('插入后',res);
     }).catch(err => {
         console.log(err);
@@ -77,7 +83,6 @@ async function getUserPwd(bodyData){
     })
     return pwd[0].upwd == bodyData.upwd 
 }
-
 // 创建新动态
 async function createUserStatus(bodyData) {
     // 汉字需要加引号
@@ -142,7 +147,7 @@ async function addFriend(bodyData){
         console.log(err);
     })
     await query(`insert into user_friend (uid,ufriendId) value('${bodyData.ufriendId}', '${bodyData.uid}');`).then(res => {
-        console.log('res-add',res);
+        console.log('res',res);
     }).catch(err => {
         console.log(err);
     })
@@ -173,17 +178,46 @@ async function judgeIsFriend(bodyData){
 }
 // 创建新二手商品动态
 async function createUserCommodityStatus(bodyData) {
+    let cid = ''
     await query(`insert into user_commodity (uid,type,contents,image)
-    value('${bodyData.uid}','${bodyData.type}','${bodyData.contents}','${config.http+bodyData.image}');`).then(res => {
-        console.log('res',res);
+    value('${bodyData.uid}','${bodyData.type}','${bodyData.contents}','');`).then(res => {
+        cid = res.insertId;
     }).catch(err => {
         console.log(err);
     })
+    
+    return cid
 }
-
-
-
-
+// 增加二手商品动态的图片
+async function addUserCommodityStatusImg(bodyData) {
+    let imageSrc = '';
+    bodyData.imgName.forEach(imgSrc => {
+        imageSrc += config.httpCommodity + imgSrc + ';';
+    });
+    query(`update user_commodity set image = '${imageSrc}' where cid = ${bodyData.cid}`).then(res => {
+    }).catch(err => {
+        console.log(err);
+    })
+   
+}
+// 获取二手商品动态
+async function getUserCommodityStatus(bodyData){
+    let arr = [];
+    await query(`select u.uid,u.uImageSrc,u.styleText,uc.cid,uc.type,uc.contents,uc.image,uc.createTime from user u,user_commodity uc where u.uid = uc.uid`).then(res=>{
+        arr = res.sort(sortDataDecrease);
+        arr = arr.map(item=>{
+            let imgArr = [];
+            if(item.image.length > 0){
+                imgArr = item.image.split(';');
+                imgArr = imgArr.splice(0,imgArr.length - 1)
+            }
+            return {...item,image: imgArr,createTime: transformTimestamp(item.createTime)}
+        });
+    }).catch(err=>{
+        console.log(err);
+    })
+    return arr
+}
 // let tableArr = [
 //     "student",
 //     "academy",
@@ -192,15 +226,7 @@ async function createUserCommodityStatus(bodyData) {
 //     "found_course",
 //     "study"
 // ];
-// 获取sql文件绝对路径
-function getSqlFilePath(sqlFileName) {
-    let basePath = __dirname
-    basePath = basePath.replace(/\\/g, '\/')
-    let pathArr = basePath.split('\/')
-    pathArr = pathArr.splice(0, pathArr.length - 1)
-    basePath = pathArr.join('/') + '/sql/';
-    return basePath + sqlFileName;
-}
+
 
 // 插入数据
 function insertValues(bodyData) {
@@ -371,13 +397,10 @@ async function getTeacherScore(bodyData){
     })
     return queryArr;
 }
-
-
-
 module.exports = {
     getSqlFilePath, insertValues, queryAllData, deleteTableData, updateTableData, getStudentCourse
     ,getStudentExamInfo,getStudentAvgScore,getTeacherCourse,getTeacherScore,getStudentGraduate,
     
     getUserPwd,createUserAccount,getUserInfo,createUserStatus,queryAllUserStatus,createNewChatContents,queryChatList,addFriend,queryFriends,
-    judgeIsFriend,createUserCommodityStatus,updateUserInfo,updateUserImg
+    judgeIsFriend,createUserCommodityStatus,updateUserInfo,updateUserImg,addUserCommodityStatusImg,getUserCommodityStatus
 }

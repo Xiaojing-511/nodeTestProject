@@ -1,11 +1,11 @@
 const multer = require("@koa/multer");
 
-let imgName;
+let imgName_commodity = [];
 //文件保存设置
 const storage = multer.diskStorage({
   // 文件保存路径, 这里需要自己手动到public下面新建upload文件夹。
   destination: function (req, file, cb) {
-    cb(null, "public/image_avatar");
+    cb(null, "public/image_commodity");
   },
   //文件名字设置
   filename(req, file, cb) {
@@ -13,8 +13,7 @@ const storage = multer.diskStorage({
     //文件名字，时间+原文件名字，防止文件名字重复
     let fileNowName =
       Date.now() + fileFormat[0] + "." + fileFormat[fileFormat.length - 1];
-    imgName = fileNowName; //记录改变后的文件名字
-
+    imgName_commodity.push(fileNowName); //记录改变后的文件名字
     cb(null, fileNowName);
   },
 });
@@ -26,7 +25,7 @@ const limits = {
     },
 };
 function getImgName(){
-    return imgName;
+  return imgName_commodity.shift();
 }
 const upload = multer({ storage, limits });
 

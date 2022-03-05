@@ -1,9 +1,13 @@
 const router = require('@koa/router')();
 const upload = require('../js/upload');
+const upload_commodity = require('../js/upload_commodity');
 const { createUserAccount,getUserPwd,createUserStatus,queryAllUserStatus
     ,createNewChatContents,queryChatList,addFriend,queryFriends,judgeIsFriend,
-    createUserCommodityStatus,updateUserInfo,getUserInfo,updateUserImg
+    createUserCommodityStatus,updateUserInfo,getUserInfo,updateUserImg,addUserCommodityStatusImg,
+    getUserCommodityStatus
 } = require('../api/communication');
+
+
 router.get('/', async (ctx) => {
     let hello = 'helll world';
     let welcomeText = 'Welcome my blog';
@@ -17,7 +21,7 @@ router.get('/', async (ctx) => {
     })
 }).post('/createAccount',async ctx=>{
     await createUserAccount(ctx.request.body);
-    console.log('friend',ctx.request.body.uid);
+    // console.log('friend',ctx.request.body.uid);
     await addFriend({
         uid: ctx.request.body.uid,
         ufriendId: '小助手'
@@ -47,8 +51,7 @@ router.get('/', async (ctx) => {
             info
         }
     }
-})
-.post('/updateAccountInfo',async ctx=>{
+}).post('/updateAccountInfo',async ctx=>{
     let info = await updateUserInfo(ctx.request.body);
     ctx.body =
     {
@@ -57,10 +60,9 @@ router.get('/', async (ctx) => {
             info
         }
     }
-})
-.post('/userlogin',async ctx=>{
+}).post('/userlogin',async ctx=>{
     let pwdIsTrue = await getUserPwd(ctx.request.body);
-    console.log('password--------',pwdIsTrue);
+    // console.log('password--------',pwdIsTrue);
     ctx.body =
     {
         status: 200,
@@ -79,16 +81,16 @@ router.get('/', async (ctx) => {
     }
 }).post('/getAllUserStatus',async ctx=>{
     let res = await queryAllUserStatus(ctx.request.body);
-    console.log('res',res);
+    // console.log('res',res);
     ctx.body =
     {
         status: 200,
         data: res
     }
 }).post('/createNewChatContents',async ctx=>{
-    console.log('ctx',ctx);
+    // console.log('ctx',ctx);
     let res = await createNewChatContents(ctx.request.body);
-    console.log('res',res);
+    // console.log('res',res);
     ctx.body =
     {
         status: 200,
@@ -96,7 +98,7 @@ router.get('/', async (ctx) => {
     }
 }).post('/queryChatList',async ctx=>{
     let res = await queryChatList(ctx.request.body);
-    console.log('res',res);
+    // console.log('res',res);
     ctx.body =
     {
         status: 200,
@@ -118,7 +120,7 @@ router.get('/', async (ctx) => {
     }
 }).post('/judgeIsFriend',async ctx=>{
     let res = await judgeIsFriend(ctx.request.body);
-    console.log('res',res);
+    // console.log('res',res);
     ctx.body =
     {
         status: 200,
@@ -126,9 +128,32 @@ router.get('/', async (ctx) => {
             isFriend: res
         }
     }
+}).post("/addAvatar", upload.upload.single("file"), async (ctx) => {
+    console.log('req...',ctx);
+    // 返回结果给前端
+    ctx.body = {
+      mesg: "ok",
+      imgName: upload.getImgName(),
+    };
+}).post("/addCommodityPhoto", upload_commodity.upload.array("filecommodity",9), async (ctx) => {
+    let img = upload_commodity.getImgName();
+    // 返回结果给前端
+    ctx.body = {
+      mesg: "ok",
+      imgName: img,
+    };
 }).post('/createUserCommodityStatus',async ctx=>{
-    let res = await createUserCommodityStatus(ctx.request.body);
-    console.log('res',res);
+    let cid = await createUserCommodityStatus(ctx.request.body);
+    // console.log('res',res);
+    ctx.body =
+    {
+        status: 200,
+        data: {
+            cid
+        }
+    }
+}).post('/addUserCommodityStatusImg',async ctx=>{
+    addUserCommodityStatusImg(ctx.request.body);
     ctx.body =
     {
         status: 200,
@@ -136,13 +161,13 @@ router.get('/', async (ctx) => {
             
         }
     }
-}).post("/add", upload.upload.single("file"), async (ctx) => {
-    console.log('upload...',upload,upload.getImgName());
-    // 返回结果给前端
-    ctx.body = {
-      mesg: "ok",
-      imgName: upload.getImgName(),
-    };
-});
+}).post('/getUserCommodityStatus',async ctx=>{
+    let data = await getUserCommodityStatus(ctx.request.body);
+    ctx.body =
+    {
+        status: 200,
+        data
+    }
+})
 
 module.exports = router;
