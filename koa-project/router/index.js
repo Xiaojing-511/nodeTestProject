@@ -1,10 +1,11 @@
 const router = require('@koa/router')();
 const upload = require('../js/upload');
 const upload_commodity = require('../js/upload_commodity');
-const { createUserAccount,getUserPwd,createUserStatus,queryAllUserStatus
+const { createUserAccount,getUserPwd,createUserStatus,queryAllUserStatus,queryUserStatus
     ,createNewChatContents,queryChatList,addFriend,queryFriends,judgeIsFriend,
     createUserCommodityStatus,updateUserInfo,getUserInfo,updateUserImg,addUserCommodityStatusImg,
-    getUserCommodityStatus
+    getAllUserCommodityStatus,getUserCommodityStatus,getCommodityTagTypes,createCommodityComment,
+    getCommodityComment,deleteUserStatus,deleteUserCommodityStatus
 } = require('../api/communication');
 
 
@@ -61,14 +62,12 @@ router.get('/', async (ctx) => {
         }
     }
 }).post('/userlogin',async ctx=>{
-    let pwdIsTrue = await getUserPwd(ctx.request.body);
+    let data = await getUserPwd(ctx.request.body);
     // console.log('password--------',pwdIsTrue);
     ctx.body =
     {
         status: 200,
-        data: {
-            pwdIsTrue
-        }
+        data
     }
 }).post('/createUserStatus',async ctx=>{
     await createUserStatus(ctx.request.body);
@@ -86,6 +85,19 @@ router.get('/', async (ctx) => {
     {
         status: 200,
         data: res
+    }
+}).post('/getUserStatus',async ctx=>{
+    let res = await queryUserStatus(ctx.request.body);
+    ctx.body =
+    {
+        status: 200,
+        data: res
+    }
+}).post('/deleteUserStatus',async ctx=>{
+    let result = await deleteUserStatus(ctx.request.body);
+    ctx.body =
+    {
+        status: result instanceof Error ? 500 : 200,
     }
 }).post('/createNewChatContents',async ctx=>{
     // console.log('ctx',ctx);
@@ -161,8 +173,41 @@ router.get('/', async (ctx) => {
             
         }
     }
+}).post('/getAllUserCommodityStatus',async ctx=>{
+    let data = await getAllUserCommodityStatus(ctx.request.body);
+    ctx.body =
+    {
+        status: 200,
+        data
+    }
 }).post('/getUserCommodityStatus',async ctx=>{
     let data = await getUserCommodityStatus(ctx.request.body);
+    ctx.body =
+    {
+        status: 200,
+        data
+    }
+}).post('/deleteUserCommodityStatus',async ctx=>{
+    let result = await deleteUserCommodityStatus(ctx.request.body);
+    ctx.body =
+    {
+        status: result instanceof Error ? 500 : 200,
+    }
+}).post('/getCommodityTagTypes',async ctx=>{
+    let data = await getCommodityTagTypes(ctx.request.body);
+    ctx.body =
+    {
+        status: 200,
+        data
+    }
+}).post('/addCommodityComment',async ctx=>{
+    await createCommodityComment(ctx.request.body);
+    ctx.body =
+    {
+        status: 200,
+    }
+}).post('/getCommodityComment',async ctx=>{
+    let data = await getCommodityComment(ctx.request.body);
     ctx.body =
     {
         status: 200,

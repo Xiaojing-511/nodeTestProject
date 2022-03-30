@@ -75,13 +75,29 @@ async function updateUserInfo(bodyData){
 }
 // 登陆-验证密码是否正确
 async function getUserPwd(bodyData){
-    let pwd;
-    await query(`select upwd
-    from user
-    where uid = '${bodyData.uid}';`).then(res=>{
-        pwd = res;
+    // 判断是否有该用户
+    let isUser = false;
+    await query(`select uid from user`).then(res=>{
+        res.forEach((item)=>{
+            if(item.uid == bodyData.uid) isUser = true;
+        })
     })
-    return pwd[0].upwd == bodyData.upwd 
+    let pwdIsTrue = false;
+    if(isUser){
+        let pwd;
+        await query(`select upwd
+        from user
+        where uid = '${bodyData.uid}';`).then(res=>{
+            pwd = res;
+        })
+        pwdIsTrue = pwd[0].upwd == bodyData.upwd;
+    }
+    return {
+        isUser,
+        pwdIsTrue
+    }
+
+
 }
 // 创建新动态
 async function createUserStatus(bodyData) {
@@ -113,6 +129,33 @@ async function queryAllUserStatus(bodyData){
     })
     return tableArr
 }
+// 查询某用户动态
+async function queryUserStatus(bodyData){
+    let tableArr = [];
+    await query(`select u.uImageSrc,us.uid,us.sid,us.contents,us.createTime
+    from user u,user_status us 
+    where u.uid = us.uid and u.uid = '${bodyData.uid}'`).then(res => {
+        tableArr = res.sort(sortDataDecrease);
+        tableArr = tableArr.map((item)=>{
+            item.createTime = transformTimestamp(item.createTime)
+            return item
+        })
+        console.log('tableArr',tableArr);
+    }).catch(err => {
+        console.log(err);
+    })
+    return tableArr
+}
+// 删除某条动态
+async function deleteUserStatus(bodyData){
+    let result = null;
+    console.log('bodyData.sid',bodyData.sid);
+    await query(`delete from user_status where sid = ${bodyData.sid}`).then(res=>{
+        console.log('delete',res);
+    }).catch(err=> result = err);
+    return result;
+}
+// 新建聊天内容
 async function createNewChatContents(bodyData) {
     console.log('参数', bodyData);
     await query(`insert into chat (cid,sendId,receptionId,chatContents)
@@ -140,6 +183,7 @@ async function queryChatList(bodyData){
     })
     return arr
 }
+// 添加好友
 async function addFriend(bodyData){
     await query(`insert into user_friend (uid,ufriendId) value('${bodyData.uid}', '${bodyData.ufriendId}');`).then(res => {
         console.log('res-add',res);
@@ -152,6 +196,7 @@ async function addFriend(bodyData){
         console.log(err);
     })
 }
+// 查询好友列表
 async function queryFriends(bodyData){
     let arr = [];
     await query(`select * from user_friend where uid = '${bodyData.uid}'`).then(res => {
@@ -200,8 +245,8 @@ async function addUserCommodityStatusImg(bodyData) {
     })
    
 }
-// 获取二手商品动态
-async function getUserCommodityStatus(bodyData){
+// 获取全部二手商品动态
+async function getAllUserCommodityStatus(bodyData){
     let arr = [];
     await query(`select u.uid,u.uImageSrc,u.styleText,uc.cid,uc.type,uc.contents,uc.image,uc.createTime from user u,user_commodity uc where u.uid = uc.uid`).then(res=>{
         arr = res.sort(sortDataDecrease);
@@ -218,6 +263,60 @@ async function getUserCommodityStatus(bodyData){
     })
     return arr
 }
+// 获取某用户二手商品动态
+async function getUserCommodityStatus(bodyData){
+    let arr = [];
+    await query(`select u.uid,u.uImageSrc,u.styleText,uc.cid,uc.type,uc.contents,uc.image,uc.createTime from user u,user_commodity uc where u.uid = uc.uid and u.uid = '${bodyData.uid}'`).then(res=>{
+        arr = res.sort(sortDataDecrease);
+        arr = arr.map(item=>{
+            let imgArr = [];
+            if(item.image.length > 0){
+                imgArr = item.image.split(';');
+                imgArr = imgArr.splice(0,imgArr.length - 1)
+            }
+            return {...item,image: imgArr,createTime: transformTimestamp(item.createTime)}
+        });
+    }).catch(err=>{
+        console.log(err);
+    })
+    return arr
+}
+// 删除用户二手商品动态
+async function deleteUserCommodityStatus(bodyData){
+    let result = null;
+    await query(`delete from user_commodity where cid = ${bodyData.cid}`).then(res=>{
+        console.log(res);
+    }).catch(err=>result = err);
+    await query(`delete from commodity_comment where cid = '${bodyData.cid}'`).then(res=>{
+        console.log(res);
+    }).catch(err=>result = err);
+    return result;
+}
+// 获取商品分类
+async function getCommodityTagTypes(){
+    return [
+        '手机数码','电脑平板','服饰鞋子','皮箱包包','书籍','食品酒类','玩具乐器','健身器材','其他'
+    ]
+}
+async function createCommodityComment(bodyData){
+    await query(`insert into commodity_comment (cid,commentUser,commentContent)
+    value('${bodyData.cid}','${bodyData.commentUser}','${bodyData.commentContent}');`).then(res => {
+        console.log('add',res);
+    }).catch(err => {
+        console.log(err);
+    })
+}
+// 获取二手动态评论
+async function getCommodityComment(bodyData){
+    let arr = [];
+    await query(`select * from commodity_comment where cid = '${bodyData.cid}'`).then(res => {
+        arr = res.sort(sortDataDecrease);
+    }).catch(err => {
+        console.log(err);
+    })
+    return arr;
+}
+
 // let tableArr = [
 //     "student",
 //     "academy",
@@ -398,9 +497,10 @@ async function getTeacherScore(bodyData){
     return queryArr;
 }
 module.exports = {
-    getSqlFilePath, insertValues, queryAllData, deleteTableData, updateTableData, getStudentCourse
-    ,getStudentExamInfo,getStudentAvgScore,getTeacherCourse,getTeacherScore,getStudentGraduate,
+    // getSqlFilePath, insertValues, queryAllData, deleteTableData, updateTableData, getStudentCourse
+    // ,getStudentExamInfo,getStudentAvgScore,getTeacherCourse,getTeacherScore,getStudentGraduate,
     
-    getUserPwd,createUserAccount,getUserInfo,createUserStatus,queryAllUserStatus,createNewChatContents,queryChatList,addFriend,queryFriends,
-    judgeIsFriend,createUserCommodityStatus,updateUserInfo,updateUserImg,addUserCommodityStatusImg,getUserCommodityStatus
+    getSqlFilePath,getUserPwd,createUserAccount,getUserInfo,createUserStatus,queryAllUserStatus,createNewChatContents,queryChatList,addFriend,queryFriends,
+    judgeIsFriend,createUserCommodityStatus,updateUserInfo,updateUserImg,addUserCommodityStatusImg,getUserCommodityStatus,getAllUserCommodityStatus,queryUserStatus,
+    getCommodityTagTypes,createCommodityComment,getCommodityComment,deleteUserStatus,deleteUserCommodityStatus
 }

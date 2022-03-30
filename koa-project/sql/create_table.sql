@@ -41,6 +41,15 @@
 -- createTime timestamp DEFAULT CURRENT_TIMESTAMP not null,
 -- primary key(cid));
 
+-- 二手动态评论表
+create table commodity_comment
+(ccid bigint(8) unsigned zerofill not null AUTO_INCREMENT,
+cid char(8) not null, 
+commentUser char(18) not null,
+commentContent varchar(100) not null,
+createTime timestamp DEFAULT CURRENT_TIMESTAMP not null,
+primary key(ccid));
+
 
 
 
