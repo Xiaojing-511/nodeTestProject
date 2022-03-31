@@ -17,8 +17,8 @@ function getSqlFilePath(sqlFileName) {
 async function createUserAccount(bodyData) {
     console.log('query',bodyData);
     // 汉字需要加引号
-    await query(`insert into user (uid,upwd,styleText,uImageSrc)
-    value('${bodyData.uid}', '${bodyData.upwd}','${bodyData.styleText}', '${bodyData.uImageSrc}');`).then(res => {
+    await query(`insert into user (uid,upwd,uacademy,umajor,ugrade,styleText,uImageSrc)
+    value('${bodyData.uid}', '${bodyData.upwd}','${bodyData.uacademy}','${bodyData.umajor}','${bodyData.ugrade}','${bodyData.styleText}', '${bodyData.uImageSrc}');`).then(res => {
         console.log('res',res);
     }).catch(err => {
         console.log(err);
@@ -146,6 +146,26 @@ async function queryUserStatus(bodyData){
     })
     return tableArr
 }
+// 查询动态评论
+async function getStatusComment(bodyData){
+    let arr = [];
+    await query(`select * from status_comment where sid = '${bodyData.sid}'`).then(res => {
+        arr = res.sort(sortDataDecrease);
+    }).catch(err => {
+        console.log(err);
+    })
+    return arr;
+}
+// 添加动态评论
+async function createStatusComment(bodyData){
+    await query(`insert into status_comment (sid,commentUser,commentContent)
+    value('${bodyData.sid}','${bodyData.commentUser}','${bodyData.commentContent}');`).then(res => {
+        console.log('add',res);
+    }).catch(err => {
+        console.log(err);
+    })
+}
+
 // 删除某条动态
 async function deleteUserStatus(bodyData){
     let result = null;
@@ -298,6 +318,7 @@ async function getCommodityTagTypes(){
         '手机数码','电脑平板','服饰鞋子','皮箱包包','书籍','食品酒类','玩具乐器','健身器材','其他'
     ]
 }
+// 添加二手动态评论
 async function createCommodityComment(bodyData){
     await query(`insert into commodity_comment (cid,commentUser,commentContent)
     value('${bodyData.cid}','${bodyData.commentUser}','${bodyData.commentContent}');`).then(res => {
@@ -502,5 +523,5 @@ module.exports = {
     
     getSqlFilePath,getUserPwd,createUserAccount,getUserInfo,createUserStatus,queryAllUserStatus,createNewChatContents,queryChatList,addFriend,queryFriends,
     judgeIsFriend,createUserCommodityStatus,updateUserInfo,updateUserImg,addUserCommodityStatusImg,getUserCommodityStatus,getAllUserCommodityStatus,queryUserStatus,
-    getCommodityTagTypes,createCommodityComment,getCommodityComment,deleteUserStatus,deleteUserCommodityStatus
+    getCommodityTagTypes,createCommodityComment,getCommodityComment,deleteUserStatus,deleteUserCommodityStatus,getStatusComment,createStatusComment
 }

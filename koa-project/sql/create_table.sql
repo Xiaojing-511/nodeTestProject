@@ -2,6 +2,9 @@
 -- create table user
 -- (uid char(18) not null, 
 -- upwd char(18) not null,
+-- uacademy char(18) not null,
+-- umajor char(18) not null,
+-- ugrade char(10) not null,
 -- styleText varchar(50) not null,
 -- uImageSrc varchar(100) not null,
 -- primary key(uid));
@@ -13,6 +16,15 @@
 -- contents varchar(100) not null,
 -- createTime timestamp DEFAULT CURRENT_TIMESTAMP not null,
 -- primary key(sid));
+
+-- 动态评论表
+create table status_comment
+(scid bigint(8) unsigned zerofill not null AUTO_INCREMENT,
+sid char(8) not null, 
+commentUser char(18) not null,
+commentContent varchar(100) not null,
+createTime timestamp DEFAULT CURRENT_TIMESTAMP not null,
+primary key(scid));
 
 -- 聊天记录表
 -- create table chat
@@ -42,13 +54,13 @@
 -- primary key(cid));
 
 -- 二手动态评论表
-create table commodity_comment
-(ccid bigint(8) unsigned zerofill not null AUTO_INCREMENT,
-cid char(8) not null, 
-commentUser char(18) not null,
-commentContent varchar(100) not null,
-createTime timestamp DEFAULT CURRENT_TIMESTAMP not null,
-primary key(ccid));
+-- create table commodity_comment
+-- (ccid bigint(8) unsigned zerofill not null AUTO_INCREMENT,
+-- cid char(8) not null, 
+-- commentUser char(18) not null,
+-- commentContent varchar(100) not null,
+-- createTime timestamp DEFAULT CURRENT_TIMESTAMP not null,
+-- primary key(ccid));
 
 
 

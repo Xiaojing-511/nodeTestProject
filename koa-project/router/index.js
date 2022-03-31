@@ -5,7 +5,7 @@ const { createUserAccount,getUserPwd,createUserStatus,queryAllUserStatus,queryUs
     ,createNewChatContents,queryChatList,addFriend,queryFriends,judgeIsFriend,
     createUserCommodityStatus,updateUserInfo,getUserInfo,updateUserImg,addUserCommodityStatusImg,
     getAllUserCommodityStatus,getUserCommodityStatus,getCommodityTagTypes,createCommodityComment,
-    getCommodityComment,deleteUserStatus,deleteUserCommodityStatus
+    getCommodityComment,deleteUserStatus,deleteUserCommodityStatus,getStatusComment,createStatusComment
 } = require('../api/communication');
 
 
@@ -25,7 +25,7 @@ router.get('/', async (ctx) => {
     // console.log('friend',ctx.request.body.uid);
     await addFriend({
         uid: ctx.request.body.uid,
-        ufriendId: '小助手'
+        ufriendId: '官方小助手'
     });
     ctx.body =
     {
@@ -88,6 +88,19 @@ router.get('/', async (ctx) => {
     }
 }).post('/getUserStatus',async ctx=>{
     let res = await queryUserStatus(ctx.request.body);
+    ctx.body =
+    {
+        status: 200,
+        data: res
+    }
+}).post('/addStatusComment',async ctx=>{
+    await createStatusComment(ctx.request.body);
+    ctx.body =
+    {
+        status: 200,
+    }
+}).post('/getStatusComment',async ctx=>{
+    let res = await getStatusComment(ctx.request.body);
     ctx.body =
     {
         status: 200,
