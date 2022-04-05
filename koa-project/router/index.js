@@ -1,13 +1,13 @@
 const router = require('@koa/router')();
 const upload = require('../js/upload');
 const upload_commodity = require('../js/upload_commodity');
-const { createUserAccount,getUserPwd,createUserStatus,queryAllUserStatus,queryUserStatus
-    ,createNewChatContents,queryChatList,addFriend,queryFriends,judgeIsFriend,
+const upload_status = require('../js/upload_status');
+const { createUserAccount,getUserPwd,isOnlyUserId,createUserStatus,addUserStatusImg,queryAllUserStatus,queryUserStatus,getTypesStatus
+    ,createNewChatContents,sendMoreChatContents,queryChatList,addFriend,queryFriends,judgeIsFriend,getStatusTagTypes,
     createUserCommodityStatus,updateUserInfo,getUserInfo,updateUserImg,addUserCommodityStatusImg,
-    getAllUserCommodityStatus,getUserCommodityStatus,getCommodityTagTypes,createCommodityComment,
+    getAllUserCommodityStatus,getTypesCommodityStatus,getUserCommodityStatus,getCommodityTagTypes,createCommodityComment,
     getCommodityComment,deleteUserStatus,deleteUserCommodityStatus,getStatusComment,createStatusComment
 } = require('../api/communication');
-
 
 router.get('/', async (ctx) => {
     let hello = 'helll world';
@@ -69,8 +69,33 @@ router.get('/', async (ctx) => {
         status: 200,
         data
     }
+}).post('/isOnlyUserId',async ctx=>{
+    let isOnly = await isOnlyUserId(ctx.request.body);
+    ctx.body =
+    {
+        status: 200,
+        data: {
+            isOnly
+        }
+    }
 }).post('/createUserStatus',async ctx=>{
-    await createUserStatus(ctx.request.body);
+    let sid = await createUserStatus(ctx.request.body);
+    ctx.body =
+    {
+        status: 200,
+        data: {
+            sid
+        }
+    }
+}).post('/addStatusPhoto',upload_status.upload.array("filestatus",9), async (ctx) => {
+    let img = upload_status.getImgName();
+    // 返回结果给前端
+    ctx.body = {
+      mesg: "ok",
+      imgName: img,
+    };
+}).post('/addUserStatusImg',async ctx=>{
+    addUserStatusImg(ctx.request.body);
     ctx.body =
     {
         status: 200,
@@ -93,6 +118,13 @@ router.get('/', async (ctx) => {
         status: 200,
         data: res
     }
+}).post('/getTypesStatus',async ctx=>{
+    let data = await getTypesStatus(ctx.request.body);
+    ctx.body =
+    {
+        status: 200,
+        data
+    }
 }).post('/addStatusComment',async ctx=>{
     await createStatusComment(ctx.request.body);
     ctx.body =
@@ -112,6 +144,13 @@ router.get('/', async (ctx) => {
     {
         status: result instanceof Error ? 500 : 200,
     }
+}).get('/getStatusTagTypes',async ctx=>{
+    let data = await getStatusTagTypes(ctx.request.body);
+    ctx.body =
+    {
+        status: 200,
+        data
+    }
 }).post('/createNewChatContents',async ctx=>{
     // console.log('ctx',ctx);
     let res = await createNewChatContents(ctx.request.body);
@@ -120,6 +159,12 @@ router.get('/', async (ctx) => {
     {
         status: 200,
         data: res
+    }
+}).post('/sendMoreChatContents',async ctx=>{
+    await sendMoreChatContents(ctx.request.body);
+    ctx.body =
+    {
+        status: 200,
     }
 }).post('/queryChatList',async ctx=>{
     let res = await queryChatList(ctx.request.body);
@@ -188,6 +233,13 @@ router.get('/', async (ctx) => {
     }
 }).post('/getAllUserCommodityStatus',async ctx=>{
     let data = await getAllUserCommodityStatus(ctx.request.body);
+    ctx.body =
+    {
+        status: 200,
+        data
+    }
+}).post('/getTypesCommodityStatus',async ctx=>{
+    let data = await getTypesCommodityStatus(ctx.request.body);
     ctx.body =
     {
         status: 200,

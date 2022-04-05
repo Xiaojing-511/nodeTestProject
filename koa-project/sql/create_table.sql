@@ -10,21 +10,23 @@
 -- primary key(uid));
 
 -- 用户动态表
--- create table user_status
--- (uid char(18) not null, 
--- sid bigint(8) unsigned zerofill not null AUTO_INCREMENT, 
--- contents varchar(100) not null,
--- createTime timestamp DEFAULT CURRENT_TIMESTAMP not null,
--- primary key(sid));
+create table user_status
+(uid char(18) not null, 
+sid bigint(8) unsigned zerofill not null AUTO_INCREMENT, 
+type varchar(100) not null,
+contents varchar(100) not null,
+image varchar(500) not null,
+createTime timestamp DEFAULT CURRENT_TIMESTAMP not null,
+primary key(sid));
 
 -- 动态评论表
-create table status_comment
-(scid bigint(8) unsigned zerofill not null AUTO_INCREMENT,
-sid char(8) not null, 
-commentUser char(18) not null,
-commentContent varchar(100) not null,
-createTime timestamp DEFAULT CURRENT_TIMESTAMP not null,
-primary key(scid));
+-- create table status_comment
+-- (scid bigint(8) unsigned zerofill not null AUTO_INCREMENT,
+-- sid char(8) not null, 
+-- commentUser char(18) not null,
+-- commentContent varchar(100) not null,
+-- createTime timestamp DEFAULT CURRENT_TIMESTAMP not null,
+-- primary key(scid));
 
 -- 聊天记录表
 -- create table chat

@@ -3,6 +3,7 @@ const { sortDataDecrease,sortDataIncrease,transformTimestamp } = require('./comm
 const config = {
     httpAvatar: 'http://localhost:3000/image_avatar/',
     httpCommodity: 'http://localhost:3000/image_commodity/',
+    httpStatus: 'http://localhost:3000/image_status/',
 }
 // 获取sql文件绝对路径
 function getSqlFilePath(sqlFileName) {
@@ -39,6 +40,18 @@ async function getUserInfo(bodyData){
     })
     return info;
 }
+// 判断用户名是否唯一
+async function isOnlyUserId(bodyData){
+    let isOnly;
+    await query(`select uid from user`).then(res=>{
+        let arr = [];
+        res.forEach(item=>{
+            arr.push(item.uid);
+        })
+        isOnly = !arr.includes(bodyData.uid);
+    })
+    return isOnly;
+}
 // 修改用户头像
 async function updateUserImg(bodyData){
     console.log(bodyData);
@@ -59,12 +72,16 @@ async function updateUserImg(bodyData){
 // 修改用户信息
 async function updateUserInfo(bodyData){
     console.log(bodyData);
+    let obj = bodyData.updateKeyValues;
+    for(var key in obj){
+        console.log('key',key,obj[key]);
+        await query(`update user set ${key} = '${obj[key]}' where uid = '${bodyData.uid}'`).then(res => {
+            console.log('插入后',res);
+        }).catch(err => {
+            console.log(err);
+        })
+    }
     let info;
-    await query(`update user set ${bodyData.updatePropKey} = '${bodyData.updatePropValue}' where uid = '${bodyData.uid}'`).then(res => {
-        console.log('插入后',res);
-    }).catch(err => {
-        console.log(err);
-    })
     await query(`select * from user where uid = '${bodyData.uid}'`).then(res => {
         console.log('uid的info',res[0]);
         info = res[0]
@@ -101,29 +118,32 @@ async function getUserPwd(bodyData){
 }
 // 创建新动态
 async function createUserStatus(bodyData) {
+    let sid = '';
     // 汉字需要加引号
-    await query(`insert into user_status (uid,contents)
-    value('${bodyData.uid}','${bodyData.contents}');`).then(res => {
+    await query(`insert into user_status (uid,type,contents,image)
+    value('${bodyData.uid}','${bodyData.type}','${bodyData.contents}','${bodyData.image}');`).then(res => {
         console.log('res',res);
+        sid = res.insertId;;
     }).catch(err => {
         console.log(err);
     })
+    return sid;
 }
 // 查询所有动态
 async function queryAllUserStatus(bodyData){
     let tableArr = [];
-    await query(`select u.uImageSrc,us.uid,us.sid,us.contents,us.createTime
+    await query(`select u.uImageSrc,us.uid,us.sid,us.type,us.contents,us.image,us.createTime
     from user u,user_status us 
     where u.uid = us.uid`).then(res => {
-        // console.log('查询到的全部动态',res,res[0].createTime,typeof res[0].createTime);
         tableArr = res.sort(sortDataDecrease);
-        console.log('tableArr1',tableArr);
         tableArr = tableArr.map((item)=>{
-            // console.log(item.createTime,transformTimestamp(item.createTime));
-            item.createTime = transformTimestamp(item.createTime)
-            return item
+            let imgArr = [];
+            if(item.image.length > 0){
+                imgArr = item.image.split(';');
+                imgArr = imgArr.splice(0,imgArr.length - 1)
+            }
+            return {...item,image: imgArr,createTime: transformTimestamp(item.createTime)}
         })
-        console.log('tableArr2',tableArr);
     }).catch(err => {
         console.log(err);
     })
@@ -132,19 +152,58 @@ async function queryAllUserStatus(bodyData){
 // 查询某用户动态
 async function queryUserStatus(bodyData){
     let tableArr = [];
-    await query(`select u.uImageSrc,us.uid,us.sid,us.contents,us.createTime
+    await query(`select u.uImageSrc,us.uid,us.sid,us.type,us.contents,us.image,us.createTime
     from user u,user_status us 
     where u.uid = us.uid and u.uid = '${bodyData.uid}'`).then(res => {
         tableArr = res.sort(sortDataDecrease);
         tableArr = tableArr.map((item)=>{
-            item.createTime = transformTimestamp(item.createTime)
-            return item
+            let imgArr = [];
+            if(item.image.length > 0){
+                imgArr = item.image.split(';');
+                imgArr = imgArr.splice(0,imgArr.length - 1)
+            }
+            return {...item,image: imgArr,createTime: transformTimestamp(item.createTime)}
         })
-        console.log('tableArr',tableArr);
     }).catch(err => {
         console.log(err);
     })
     return tableArr
+}
+// 按类别获取动态
+async function getTypesStatus(bodyData){
+    let types = bodyData.statusTypes;
+    let sqlStr = ''; 
+    for(var i in types){
+        sqlStr += sqlStr ? ` or us.type = '${types[i]}'` : `(us.type = '${types[i]}'`;
+    }
+    sqlStr = `select u.uImageSrc,us.uid,us.sid,us.type,us.contents,us.image,us.createTime
+    from user u,user_status us 
+    where u.uid = us.uid and ` + sqlStr + ')';
+    let arr = [];
+    await query(sqlStr).then(res=>{
+        arr = res.sort(sortDataDecrease);
+        arr = arr.map(item=>{
+            let imgArr = [];
+            if(item.image.length > 0){
+                imgArr = item.image.split(';');
+                imgArr = imgArr.splice(0,imgArr.length - 1)
+            }
+            return {...item,image: imgArr,createTime: transformTimestamp(item.createTime)}
+        });
+    }).catch(err=>{
+        console.log(err);
+    })
+    return arr
+}
+async function addUserStatusImg(bodyData){
+    let imageSrc = '';
+    bodyData.imgName.forEach(imgSrc => {
+        imageSrc += config.httpStatus + imgSrc + ';';
+    });
+    query(`update user_status set image = '${imageSrc}' where sid = ${bodyData.sid}`).then(res => {
+    }).catch(err => {
+        console.log(err);
+    })
 }
 // 查询动态评论
 async function getStatusComment(bodyData){
@@ -165,7 +224,6 @@ async function createStatusComment(bodyData){
         console.log(err);
     })
 }
-
 // 删除某条动态
 async function deleteUserStatus(bodyData){
     let result = null;
@@ -175,21 +233,26 @@ async function deleteUserStatus(bodyData){
     }).catch(err=> result = err);
     return result;
 }
+// 获取动态类型
+async function getStatusTagTypes(){
+    return ['日常动态','学习讨论','提问学长学姐','招领寻物','周边美食分享','其他'];
+}
 // 新建聊天内容
 async function createNewChatContents(bodyData) {
-    console.log('参数', bodyData);
     await query(`insert into chat (cid,sendId,receptionId,chatContents)
     value(null,'${bodyData.sendId}', '${bodyData.receptionId}', '${bodyData.chatContents}');`).then(res => {
-        // return res.sortDataIncrease()
         console.log('res',res);
     }).catch(err => {
         console.log(err);
     })
-    // await query(`select * from chat`).then(res => {
-    //     console.log('插入后',res);
-    // }).catch(err => {
-    //     console.log(err);
-    // })
+}
+// 群发消息
+async function sendMoreChatContents(bodyData){
+    bodyData.receptionIds.forEach(receptionId=>{
+        createNewChatContents({sendId: bodyData.sendId, receptionId, chatContents: bodyData.chatContents}).then(res=>{
+            console.log(res);
+        })
+    })
 }
 // 查询聊天记录
 async function queryChatList(bodyData){
@@ -220,7 +283,9 @@ async function addFriend(bodyData){
 async function queryFriends(bodyData){
     let arr = [];
     await query(`select * from user_friend where uid = '${bodyData.uid}'`).then(res => {
-        arr = res
+        arr = res.sort((a, b) =>{
+            return b.addTime - a.addTime
+        })
     }).catch(err => {
         console.log(err);
     })
@@ -269,6 +334,30 @@ async function addUserCommodityStatusImg(bodyData) {
 async function getAllUserCommodityStatus(bodyData){
     let arr = [];
     await query(`select u.uid,u.uImageSrc,u.styleText,uc.cid,uc.type,uc.contents,uc.image,uc.createTime from user u,user_commodity uc where u.uid = uc.uid`).then(res=>{
+        arr = res.sort(sortDataDecrease);
+        arr = arr.map(item=>{
+            let imgArr = [];
+            if(item.image.length > 0){
+                imgArr = item.image.split(';');
+                imgArr = imgArr.splice(0,imgArr.length - 1)
+            }
+            return {...item,image: imgArr,createTime: transformTimestamp(item.createTime)}
+        });
+    }).catch(err=>{
+        console.log(err);
+    })
+    return arr
+}
+// 按类别获取二手商品动态
+async function getTypesCommodityStatus(bodyData){
+    let types = bodyData.commodityTypes;
+    let sqlStr = ''; 
+    for(var i in types){
+        sqlStr += sqlStr ? ` or uc.type = '${types[i]}'` : `(uc.type = '${types[i]}'`;
+    }
+    sqlStr = `select u.uid,u.uImageSrc,u.styleText,uc.cid,uc.type,uc.contents,uc.image,uc.createTime from user u,user_commodity uc where u.uid = uc.uid and ` + sqlStr + ')';
+    let arr = [];
+    await query(sqlStr).then(res=>{
         arr = res.sort(sortDataDecrease);
         arr = arr.map(item=>{
             let imgArr = [];
@@ -521,7 +610,8 @@ module.exports = {
     // getSqlFilePath, insertValues, queryAllData, deleteTableData, updateTableData, getStudentCourse
     // ,getStudentExamInfo,getStudentAvgScore,getTeacherCourse,getTeacherScore,getStudentGraduate,
     
-    getSqlFilePath,getUserPwd,createUserAccount,getUserInfo,createUserStatus,queryAllUserStatus,createNewChatContents,queryChatList,addFriend,queryFriends,
-    judgeIsFriend,createUserCommodityStatus,updateUserInfo,updateUserImg,addUserCommodityStatusImg,getUserCommodityStatus,getAllUserCommodityStatus,queryUserStatus,
-    getCommodityTagTypes,createCommodityComment,getCommodityComment,deleteUserStatus,deleteUserCommodityStatus,getStatusComment,createStatusComment
+    getSqlFilePath,getUserPwd,createUserAccount,getUserInfo,isOnlyUserId,createUserStatus,queryAllUserStatus,getTypesStatus,createNewChatContents,queryChatList,addFriend,queryFriends,
+    judgeIsFriend,createUserCommodityStatus,updateUserInfo,updateUserImg,addUserCommodityStatusImg,getUserCommodityStatus,getAllUserCommodityStatus,getTypesCommodityStatus,queryUserStatus,
+    getCommodityTagTypes,createCommodityComment,getCommodityComment,deleteUserStatus,getStatusTagTypes,deleteUserCommodityStatus,getStatusComment,createStatusComment,addUserStatusImg
+    ,sendMoreChatContents
 }
