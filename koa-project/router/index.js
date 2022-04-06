@@ -2,6 +2,7 @@ const router = require('@koa/router')();
 const upload = require('../js/upload');
 const upload_commodity = require('../js/upload_commodity');
 const upload_status = require('../js/upload_status');
+const upload_chat = require('../js/upload_chat');
 const { createUserAccount,getUserPwd,isOnlyUserId,createUserStatus,addUserStatusImg,queryAllUserStatus,queryUserStatus,getTypesStatus
     ,createNewChatContents,sendMoreChatContents,queryChatList,addFriend,queryFriends,judgeIsFriend,getStatusTagTypes,
     createUserCommodityStatus,updateUserInfo,getUserInfo,updateUserImg,addUserCommodityStatusImg,
@@ -166,7 +167,15 @@ router.get('/', async (ctx) => {
     {
         status: 200,
     }
-}).post('/queryChatList',async ctx=>{
+}).post("/addChatPhoto", upload_chat.upload.single("filechat"), async (ctx) => {
+    console.log('req...',ctx);
+    // 返回结果给前端
+    ctx.body = {
+      mesg: "ok",
+      imgName: upload_chat.getImgName(),
+    };
+})
+.post('/queryChatList',async ctx=>{
     let res = await queryChatList(ctx.request.body);
     // console.log('res',res);
     ctx.body =

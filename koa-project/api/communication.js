@@ -4,6 +4,7 @@ const config = {
     httpAvatar: 'http://localhost:3000/image_avatar/',
     httpCommodity: 'http://localhost:3000/image_commodity/',
     httpStatus: 'http://localhost:3000/image_status/',
+    httpChat: 'http://localhost:3000/image_chat/',
 }
 // 获取sql文件绝对路径
 function getSqlFilePath(sqlFileName) {
@@ -195,6 +196,10 @@ async function getTypesStatus(bodyData){
     })
     return arr
 }
+// 获取动态类型
+async function getStatusTagTypes(){
+    return ['日常动态','学习讨论','提问学长学姐','招领寻物','#话题讨论','周边美食分享','其他'];
+}
 async function addUserStatusImg(bodyData){
     let imageSrc = '';
     bodyData.imgName.forEach(imgSrc => {
@@ -233,14 +238,14 @@ async function deleteUserStatus(bodyData){
     }).catch(err=> result = err);
     return result;
 }
-// 获取动态类型
-async function getStatusTagTypes(){
-    return ['日常动态','学习讨论','提问学长学姐','招领寻物','周边美食分享','其他'];
-}
+
 // 新建聊天内容
 async function createNewChatContents(bodyData) {
-    await query(`insert into chat (cid,sendId,receptionId,chatContents)
-    value(null,'${bodyData.sendId}', '${bodyData.receptionId}', '${bodyData.chatContents}');`).then(res => {
+    if(bodyData.chatImage){
+        bodyData.chatImage = config.httpChat + bodyData.chatImage;
+    }
+    await query(`insert into chat (cid,sendId,receptionId,chatContents,chatImage)
+    value(null,'${bodyData.sendId}', '${bodyData.receptionId}', '${bodyData.chatContents}','${bodyData.chatImage}');`).then(res => {
         console.log('res',res);
     }).catch(err => {
         console.log(err);
@@ -257,7 +262,7 @@ async function sendMoreChatContents(bodyData){
 // 查询聊天记录
 async function queryChatList(bodyData){
     let arr = [];
-    await query(`select u.uImageSrc,c.cid,c.sendId,c.receptionId,c.chatContents,c.sendTime
+    await query(`select u.uImageSrc,c.cid,c.sendId,c.receptionId,c.chatContents,c.chatImage,c.sendTime
     from chat c, user u
     where u.uid = c.sendId and c.sendId = '${bodyData.sendId}' and c.receptionId = '${bodyData.receptionId}' or u.uid = c.sendId and c.sendId = '${bodyData.receptionId}' and c.receptionId = '${bodyData.sendId}';`).then(res => {
         arr = res.sort(sortDataIncrease)
