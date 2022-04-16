@@ -254,7 +254,7 @@ async function createNewChatContents(bodyData) {
 // 群发消息
 async function sendMoreChatContents(bodyData){
     bodyData.receptionIds.forEach(receptionId=>{
-        createNewChatContents({sendId: bodyData.sendId, receptionId, chatContents: bodyData.chatContents}).then(res=>{
+        createNewChatContents({sendId: bodyData.sendId, receptionId, chatContents: bodyData.chatContents,chatImage: bodyData.chatImage}).then(res=>{
             console.log(res);
         })
     })
@@ -310,6 +310,16 @@ async function judgeIsFriend(bodyData){
         console.log(err);
     })
     return isFriend;
+}
+async function deleteFriend(bodyData){
+    await query(`delete from user_friend where uid = '${bodyData.uid}' and ufriendId = '${bodyData.friendId}' or uid = '${bodyData.friendId}' and ufriendId = '${bodyData.uid}'`)
+    .then(res=>{
+        console.log('delete res',res);
+        query(`delete from chat where sendId = '${bodyData.uid}' and receptionId = '${bodyData.friendId}' or sendId = '${bodyData.friendId}' and receptionId = '${bodyData.uid}'`)
+        .then(res=>{
+            console.log('delete chat', res);
+        })
+    })
 }
 // 创建新二手商品动态
 async function createUserCommodityStatus(bodyData) {
@@ -616,7 +626,7 @@ module.exports = {
     // ,getStudentExamInfo,getStudentAvgScore,getTeacherCourse,getTeacherScore,getStudentGraduate,
     
     getSqlFilePath,getUserPwd,createUserAccount,getUserInfo,isOnlyUserId,createUserStatus,queryAllUserStatus,getTypesStatus,createNewChatContents,queryChatList,addFriend,queryFriends,
-    judgeIsFriend,createUserCommodityStatus,updateUserInfo,updateUserImg,addUserCommodityStatusImg,getUserCommodityStatus,getAllUserCommodityStatus,getTypesCommodityStatus,queryUserStatus,
+    judgeIsFriend,deleteFriend,createUserCommodityStatus,updateUserInfo,updateUserImg,addUserCommodityStatusImg,getUserCommodityStatus,getAllUserCommodityStatus,getTypesCommodityStatus,queryUserStatus,
     getCommodityTagTypes,createCommodityComment,getCommodityComment,deleteUserStatus,getStatusTagTypes,deleteUserCommodityStatus,getStatusComment,createStatusComment,addUserStatusImg
     ,sendMoreChatContents
 }

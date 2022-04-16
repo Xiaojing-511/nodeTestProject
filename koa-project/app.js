@@ -45,8 +45,12 @@ wss.on('connection', ws => {
     ws.on('message', e => {
         var resData = JSON.parse(e);
         console.log('服务端接收的消息：', e)
+        let data = {
+            sendId: resData.sendId, 
+        };
+        data.receptionId = resData.receptionId ? resData.receptionId : resData.receptionIds;
         // 每次发送都相当于广播一次消息
-        wss.broadcast(JSON.stringify({ sendId: resData.sendId, receptionId: resData.receptionId}))
+        wss.broadcast(JSON.stringify(data))
     })
     ws.on('close', function (e) {
         console.log('长连接已关闭',e)

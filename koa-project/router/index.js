@@ -4,7 +4,7 @@ const upload_commodity = require('../js/upload_commodity');
 const upload_status = require('../js/upload_status');
 const upload_chat = require('../js/upload_chat');
 const { createUserAccount,getUserPwd,isOnlyUserId,createUserStatus,addUserStatusImg,queryAllUserStatus,queryUserStatus,getTypesStatus
-    ,createNewChatContents,sendMoreChatContents,queryChatList,addFriend,queryFriends,judgeIsFriend,getStatusTagTypes,
+    ,createNewChatContents,sendMoreChatContents,queryChatList,addFriend,queryFriends,judgeIsFriend,deleteFriend,getStatusTagTypes,
     createUserCommodityStatus,updateUserInfo,getUserInfo,updateUserImg,addUserCommodityStatusImg,
     getAllUserCommodityStatus,getTypesCommodityStatus,getUserCommodityStatus,getCommodityTagTypes,createCommodityComment,
     getCommodityComment,deleteUserStatus,deleteUserCommodityStatus,getStatusComment,createStatusComment
@@ -77,6 +77,15 @@ router.get('/', async (ctx) => {
         status: 200,
         data: {
             isOnly
+        }
+    }
+}).post('/searchUser',async ctx=>{
+    let isHave = await isOnlyUserId(ctx.request.body);
+    ctx.body =
+    {
+        status: 200,
+        data: {
+            isHave: !isHave
         }
     }
 }).post('/createUserStatus',async ctx=>{
@@ -205,6 +214,15 @@ router.get('/', async (ctx) => {
         status: 200,
         data: {
             isFriend: res
+        }
+    }
+}).post('/deleteFriend',async ctx=>{
+    await deleteFriend(ctx.request.body);
+    // console.log('res',res);
+    ctx.body =
+    {
+        status: 200,
+        data: {
         }
     }
 }).post("/addAvatar", upload.upload.single("file"), async (ctx) => {
