@@ -1,13 +1,14 @@
 -- 用户表
--- create table user
--- (uid char(18) not null, 
--- upwd char(18) not null,
--- uacademy char(18) not null,
--- umajor char(18) not null,
--- ugrade char(10) not null,
--- styleText varchar(50) not null,
--- uImageSrc varchar(100) not null,
--- primary key(uid));
+create table user
+(uid char(18) not null, 
+upwd char(18) not null,
+utype char(10),
+uacademy char(18) not null,
+umajor char(18) not null,
+ugrade char(10) not null,
+styleText varchar(50) not null,
+uImageSrc varchar(100) not null,
+primary key(uid));
 
 -- 用户动态表
 -- create table user_status
@@ -29,14 +30,14 @@
 -- primary key(scid));
 
 -- 聊天记录表
-create table chat
-(cid bigint(8) unsigned zerofill not null AUTO_INCREMENT,
-sendId char(18) not null, 
-receptionId char(18) not null, 
-sendTime timestamp DEFAULT CURRENT_TIMESTAMP not null,
-chatContents varchar(150) not null,
-chatImage varchar(100) not null,
-primary key(cid));
+-- create table chat
+-- (cid bigint(8) unsigned zerofill not null AUTO_INCREMENT,
+-- sendId char(18) not null, 
+-- receptionId char(18) not null, 
+-- sendTime timestamp DEFAULT CURRENT_TIMESTAMP not null,
+-- chatContents varchar(150) not null,
+-- chatImage varchar(100) not null,
+-- primary key(cid));
 
 -- 用户好友表
 -- create table user_friend

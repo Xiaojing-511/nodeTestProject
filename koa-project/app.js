@@ -20,6 +20,8 @@ app.use(bodyParser());
 app.use(views(path.join(__dirname, './views'), {
     extension: 'ejs'  // ejs文件的扩展名，可以是任何有效的扩展名
 }))
+const check = require('./utils/check')
+app.use(check)
 // 启动路由
 app.use(router.routes()).use(router.allowedMethods());
 // 以上为官方推荐方式，allowedMethods用在routes之后，作用是根据ctx.status设置response header.

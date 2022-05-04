@@ -1,4 +1,5 @@
 const { query } = require('../js/server');
+const jwt = require('jsonwebtoken')
 const { sortDataDecrease,sortDataIncrease,transformTimestamp } = require('./common');
 const config = {
     httpAvatar: 'http://localhost:3000/image_avatar/',
@@ -6,6 +7,7 @@ const config = {
     httpStatus: 'http://localhost:3000/image_status/',
     httpChat: 'http://localhost:3000/image_chat/',
 }
+const SECRET_KEY = 'Online social networking site for college students';
 // 获取sql文件绝对路径
 function getSqlFilePath(sqlFileName) {
     let basePath = __dirname
@@ -109,10 +111,16 @@ async function getUserPwd(bodyData){
             pwd = res;
         })
         pwdIsTrue = pwd[0].upwd == bodyData.upwd;
+        if(pwdIsTrue){
+            // 24小时
+            let payload = {uid: bodyData.uid,time: new Date().getTime(),timeout:1000*60*60}
+            var token = jwt.sign(payload, SECRET_KEY,{});
+        }
     }
     return {
         isUser,
-        pwdIsTrue
+        pwdIsTrue,
+        token
     }
 
 
@@ -133,9 +141,10 @@ async function createUserStatus(bodyData) {
 // 查询所有动态
 async function queryAllUserStatus(bodyData){
     let tableArr = [];
-    await query(`select u.uImageSrc,us.uid,us.sid,us.type,us.contents,us.image,us.createTime
+    await query(`select u.uImageSrc,u.utype,us.uid,us.sid,us.type,us.contents,us.image,us.createTime
     from user u,user_status us 
     where u.uid = us.uid`).then(res => {
+        console.log('res',res);
         tableArr = res.sort(sortDataDecrease);
         tableArr = tableArr.map((item)=>{
             let imgArr = [];
@@ -173,11 +182,12 @@ async function queryUserStatus(bodyData){
 // 按类别获取动态
 async function getTypesStatus(bodyData){
     let types = bodyData.statusTypes;
+    console.log('types...', types);
     let sqlStr = ''; 
     for(var i in types){
         sqlStr += sqlStr ? ` or us.type = '${types[i]}'` : `(us.type = '${types[i]}'`;
     }
-    sqlStr = `select u.uImageSrc,us.uid,us.sid,us.type,us.contents,us.image,us.createTime
+    sqlStr = `select u.uImageSrc,u.utype,us.uid,us.sid,us.type,us.contents,us.image,us.createTime
     from user u,user_status us 
     where u.uid = us.uid and ` + sqlStr + ')';
     let arr = [];
@@ -348,7 +358,7 @@ async function addUserCommodityStatusImg(bodyData) {
 // 获取全部二手商品动态
 async function getAllUserCommodityStatus(bodyData){
     let arr = [];
-    await query(`select u.uid,u.uImageSrc,u.styleText,uc.cid,uc.type,uc.contents,uc.image,uc.createTime from user u,user_commodity uc where u.uid = uc.uid`).then(res=>{
+    await query(`select u.uid,u.uImageSrc,u.styleText,u.utype,uc.cid,uc.type,uc.contents,uc.image,uc.createTime from user u,user_commodity uc where u.uid = uc.uid`).then(res=>{
         arr = res.sort(sortDataDecrease);
         arr = arr.map(item=>{
             let imgArr = [];
@@ -370,7 +380,7 @@ async function getTypesCommodityStatus(bodyData){
     for(var i in types){
         sqlStr += sqlStr ? ` or uc.type = '${types[i]}'` : `(uc.type = '${types[i]}'`;
     }
-    sqlStr = `select u.uid,u.uImageSrc,u.styleText,uc.cid,uc.type,uc.contents,uc.image,uc.createTime from user u,user_commodity uc where u.uid = uc.uid and ` + sqlStr + ')';
+    sqlStr = `select u.uid,u.uImageSrc,u.styleText,u.utype,uc.cid,uc.type,uc.contents,uc.image,uc.createTime from user u,user_commodity uc where u.uid = uc.uid and ` + sqlStr + ')';
     let arr = [];
     await query(sqlStr).then(res=>{
         arr = res.sort(sortDataDecrease);
