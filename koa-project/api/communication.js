@@ -206,6 +206,14 @@ async function getTypesStatus(bodyData){
     })
     return arr
 }
+// 删除动态-评论
+async function deleteStatusComment(bodyData){
+    await query(`delete from status_comment where scid = ${bodyData.commentId}`).then(res=>{
+        console.log('delete comment res',res);
+    }).catch(err => {
+        console.log(err);
+    })
+}
 // 获取动态类型
 async function getStatusTagTypes(){
     return ['日常动态','学习讨论','提问学长学姐','招领寻物','#话题讨论','周边美食分享','其他'];
@@ -283,16 +291,9 @@ async function queryChatList(bodyData){
 }
 // 添加好友
 async function addFriend(bodyData){
-    await query(`insert into user_friend (uid,ufriendId) value('${bodyData.uid}', '${bodyData.ufriendId}');`).then(res => {
-        console.log('res-add',res);
-    }).catch(err => {
-        console.log(err);
-    })
-    await query(`insert into user_friend (uid,ufriendId) value('${bodyData.ufriendId}', '${bodyData.uid}');`).then(res => {
-        console.log('res',res);
-    }).catch(err => {
-        console.log(err);
-    })
+    Promise.all([query(`insert into user_friend (uid,ufriendId) value('${bodyData.uid}', '${bodyData.ufriendId}');`),
+    query(`insert into user_friend (uid,ufriendId) value('${bodyData.ufriendId}', '${bodyData.uid}');`)])
+    .then(values=>console.log(values)).catch(err=>console.log(err))
 }
 // 查询好友列表
 async function queryFriends(bodyData){
@@ -310,11 +311,9 @@ async function queryFriends(bodyData){
 async function judgeIsFriend(bodyData){
     let isFriend = '';
     await query(`select ufriendId from user_friend where uid = '${bodyData.uid}'`).then(res => {
-        console.log('res',res);
         let friendsIdArr = res.map((item)=>{
             return item.ufriendId
         });
-        console.log('friendsIdArr',friendsIdArr);
         isFriend = friendsIdArr.includes(bodyData.ufriendId);
     }).catch(err => {
         console.log(err);
@@ -322,13 +321,24 @@ async function judgeIsFriend(bodyData){
     return isFriend;
 }
 async function deleteFriend(bodyData){
-    await query(`delete from user_friend where uid = '${bodyData.uid}' and ufriendId = '${bodyData.friendId}' or uid = '${bodyData.friendId}' and ufriendId = '${bodyData.uid}'`)
-    .then(res=>{
-        console.log('delete res',res);
-        query(`delete from chat where sendId = '${bodyData.uid}' and receptionId = '${bodyData.friendId}' or sendId = '${bodyData.friendId}' and receptionId = '${bodyData.uid}'`)
-        .then(res=>{
-            console.log('delete chat', res);
-        })
+    Promise.all([query(`delete from user_friend where uid = '${bodyData.uid}' and ufriendId = '${bodyData.friendId}' or uid = '${bodyData.friendId}' and ufriendId = '${bodyData.uid}'`),
+    query(`delete from chat where sendId = '${bodyData.uid}' and receptionId = '${bodyData.friendId}' or sendId = '${bodyData.friendId}' and receptionId = '${bodyData.uid}'`)])
+    .then(values=>console.log(values)).catch(err => {
+        console.log(err);
+    })
+}
+// 管理员注销用户
+async function deleteUser(bodyData){
+    let queryUser = query(`delete from user where uid = '${bodyData.uid}'`);
+    let queryStatus = query(`delete from user_status where uid = '${bodyData.uid}'`);
+    let queryStatusComment = query(`delete from status_comment where commentUser = '${bodyData.uid}'`);
+    let queryCommodity = query(`delete from user_commodity where uid = '${bodyData.uid}'`);
+    let queryCommodityComment = query(`delete from commodity_comment where commentUser = '${bodyData.uid}'`);
+    let queryFriends = query(`delete from user_friend where uid = '${bodyData.uid}' or ufriendId = '${bodyData.uid}'`);
+    let queryChat = query(`delete from chat where sendId = '${bodyData.uid}' or receptionId = '${bodyData.uid}'`);
+    let promiseArr = [queryUser,queryStatus,queryStatusComment,queryCommodity,queryCommodityComment,queryFriends,queryChat];
+    Promise.all(promiseArr).then(values=>console.log(values)).catch(err => {
+        console.log(err);
     })
 }
 // 创建新二手商品动态
@@ -425,6 +435,14 @@ async function deleteUserCommodityStatus(bodyData){
         console.log(res);
     }).catch(err=>result = err);
     return result;
+}
+// 删除二手商品动态-评论
+async function deleteCommodityComment(bodyData){
+    await query(`delete from commodity_comment where ccid = ${bodyData.commentId}`).then(res=>{
+        console.log('delete comment res',res);
+    }).catch(err => {
+        console.log(err);
+    })
 }
 // 获取商品分类
 async function getCommodityTagTypes(){
@@ -636,7 +654,7 @@ module.exports = {
     // ,getStudentExamInfo,getStudentAvgScore,getTeacherCourse,getTeacherScore,getStudentGraduate,
     
     getSqlFilePath,getUserPwd,createUserAccount,getUserInfo,isOnlyUserId,createUserStatus,queryAllUserStatus,getTypesStatus,createNewChatContents,queryChatList,addFriend,queryFriends,
-    judgeIsFriend,deleteFriend,createUserCommodityStatus,updateUserInfo,updateUserImg,addUserCommodityStatusImg,getUserCommodityStatus,getAllUserCommodityStatus,getTypesCommodityStatus,queryUserStatus,
+    judgeIsFriend,deleteFriend,deleteUser,createUserCommodityStatus,updateUserInfo,updateUserImg,addUserCommodityStatusImg,getUserCommodityStatus,getAllUserCommodityStatus,getTypesCommodityStatus,queryUserStatus,
     getCommodityTagTypes,createCommodityComment,getCommodityComment,deleteUserStatus,getStatusTagTypes,deleteUserCommodityStatus,getStatusComment,createStatusComment,addUserStatusImg
-    ,sendMoreChatContents
+    ,sendMoreChatContents,deleteStatusComment,deleteCommodityComment
 }

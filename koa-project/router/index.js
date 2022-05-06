@@ -4,10 +4,10 @@ const upload_commodity = require('../js/upload_commodity');
 const upload_status = require('../js/upload_status');
 const upload_chat = require('../js/upload_chat');
 const { createUserAccount,getUserPwd,isOnlyUserId,createUserStatus,addUserStatusImg,queryAllUserStatus,queryUserStatus,getTypesStatus
-    ,createNewChatContents,sendMoreChatContents,queryChatList,addFriend,queryFriends,judgeIsFriend,deleteFriend,getStatusTagTypes,
+    ,createNewChatContents,sendMoreChatContents,queryChatList,addFriend,queryFriends,judgeIsFriend,deleteFriend,deleteUser,getStatusTagTypes,
     createUserCommodityStatus,updateUserInfo,getUserInfo,updateUserImg,addUserCommodityStatusImg,
-    getAllUserCommodityStatus,getTypesCommodityStatus,getUserCommodityStatus,getCommodityTagTypes,createCommodityComment,
-    getCommodityComment,deleteUserStatus,deleteUserCommodityStatus,getStatusComment,createStatusComment
+    getAllUserCommodityStatus,deleteStatusComment,getTypesCommodityStatus,getUserCommodityStatus,getCommodityTagTypes,createCommodityComment,
+    getCommodityComment,deleteUserStatus,deleteUserCommodityStatus,getStatusComment,createStatusComment,deleteCommodityComment
 } = require('../api/communication');
 
 router.get('/', async (ctx) => {
@@ -128,6 +128,13 @@ router.get('/', async (ctx) => {
         status: 200,
         data: res
     }
+}).post('/deleteStatusComment',async ctx=>{
+    let data = await deleteStatusComment(ctx.request.body);
+    ctx.body =
+    {
+        status: 200,
+        data
+    }
 }).post('/getTypesStatus',async ctx=>{
     let data = await getTypesStatus(ctx.request.body);
     ctx.body =
@@ -225,6 +232,15 @@ router.get('/', async (ctx) => {
         data: {
         }
     }
+}).post('/deleteUser',async ctx=>{
+    await deleteUser(ctx.request.body);
+    // console.log('res',res);
+    ctx.body =
+    {
+        status: 200,
+        data: {
+        }
+    }
 }).post("/addAvatar", upload.upload.single("file"), async (ctx) => {
     console.log('req...',ctx);
     // 返回结果给前端
@@ -284,6 +300,13 @@ router.get('/', async (ctx) => {
     ctx.body =
     {
         status: result instanceof Error ? 500 : 200,
+    }
+}).post('/deleteCommodityComment',async ctx=>{
+    let data = await deleteCommodityComment(ctx.request.body);
+    ctx.body =
+    {
+        status: 200,
+        data
     }
 }).post('/getCommodityTagTypes',async ctx=>{
     let data = await getCommodityTagTypes(ctx.request.body);
