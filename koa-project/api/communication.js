@@ -142,8 +142,7 @@ async function createUserStatus(bodyData) {
 async function queryAllUserStatus(bodyData){
     let tableArr = [];
     await query(`select u.uImageSrc,u.utype,us.uid,us.sid,us.type,us.contents,us.image,us.createTime
-    from user u,user_status us 
-    where u.uid = us.uid`).then(res => {
+    from user u,user_status us where u.uid = us.uid`).then(res => {
         console.log('res',res);
         tableArr = res.sort(sortDataDecrease);
         tableArr = tableArr.map((item)=>{
